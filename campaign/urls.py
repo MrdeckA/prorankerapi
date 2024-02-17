@@ -1,8 +1,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from campaign.views import CampagneListeView, CampagneDetailView, CandidatListeView, CandidatDetailView, CandidatBulkCreateView, CandidatUpdateCVPathView, CollaborateurListeView, CollaborateurDetailView
-from .views import upload_files, file_list
+from campaign.views import CampagneListeView, CampagneDetailView, CandidatListeView, CandidatDetailView, CollaborateurListeView, CollaborateurDetailView
 
 
 urlpatterns = [
@@ -14,12 +13,7 @@ urlpatterns = [
          name='collaborateur-liste'),
     path('collaborateurs/<int:pk>/',
          CollaborateurDetailView.as_view(), name='collaborateur-detail'),
-    path('upload/', upload_files, name='upload_files'),
-    path('file-list/', file_list, name='file_list'),
-    path('candidats/bulk-create/',
-         CandidatBulkCreateView.as_view(), name='candidat-bulk-create'),
-    path('candidats/update-cv-path/',
-         CandidatUpdateCVPathView.as_view(), name='candidat-update-cv-path'),
+
 
 
 

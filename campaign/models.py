@@ -53,13 +53,6 @@ class Candidat(models.Model):
         return f'{self.prenom} {self.nom} - Campagne: {self.campagne.nom}'
 
 
-class UploadedFile(models.Model):
-    original_filename = models.CharField(max_length=255)
-    saved_filename = models.CharField(max_length=255)
-    upload_date = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='uploads/')
-
-
 class Collaborateur(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     campagne = models.ForeignKey(
