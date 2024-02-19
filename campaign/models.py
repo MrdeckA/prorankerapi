@@ -5,20 +5,6 @@ import fitz
 from django.contrib.auth.models import User
 
 
-class Langue(models.Model):
-    nom = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.nom
-
-
-class Competence(models.Model):
-    nom = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.nom
-
-
 class Campagne(models.Model):
     nom = models.CharField(max_length=255, blank=False, default="")
     description = models.TextField(default="", blank=False)
@@ -27,8 +13,8 @@ class Campagne(models.Model):
     minimum_number_of_experiences = models.IntegerField(default=0)
     minimum_number_of_years_of_experience = models.IntegerField(default=0)
     minimum_degree = models.CharField(max_length=255, default="")
-    languages = models.ManyToManyField(Langue)
-    skills = models.ManyToManyField(Competence)
+    languages = models.TextField(blank=True, null=True)
+    skills = models.TextField(blank=True, null=True)
     has_awards = models.BooleanField(default=False)
     has_certifications = models.BooleanField(default=False)
 

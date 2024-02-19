@@ -1,6 +1,6 @@
 import sys
 import fitz
-fname = 'Alice Clark CV.pdf'
+fname = './uploads/cv1.pdf'
 doc = fitz.open(fname)
 text = " "
 for page in doc:

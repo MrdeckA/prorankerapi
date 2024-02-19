@@ -62,3 +62,48 @@ class CollaborateurListeView(generics.ListCreateAPIView):
 class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Collaborateur.objects.all()
     serializer_class = CollaborateurSerializer
+
+
+def lire_contenu_pdf(request):
+    fname = './uploads/cv1.pdf'
+    doc = fitz.open(fname)
+    text = " "
+    for page in doc:
+        text = text + str(page.get_text())
+    return JsonResponse({"texte_pdf": text})
+
+
+def charger_contenu_pdfs(request):
+    # Assurez-vous d'ajuster le chemin selon votre structure de fichiers
+    dossier_cvs = './uploads/'
+
+    contenu_cvs = []
+
+    for i in range(1, 23):  # Boucle de cv1.pdf à cv22.pdf
+        nom_fichier = f'cv{i}.pdf'
+        chemin_fichier = os.path.join(dossier_cvs, nom_fichier)
+
+        if os.path.exists(chemin_fichier):
+            doc = fitz.open(chemin_fichier)
+            texte = " "
+            for page in doc:
+                texte = texte + str(page.get_text())
+
+            predict = CampaignConfig.nlp(texte)
+
+            print(f"done for cv{i}.pdf")
+            predict1 = []
+
+            for ent in predict.ents:
+                # Écrire le texte et l'étiquette de l'entité dans le fichier
+                ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+                predict1.append(ligne)
+
+            contenu_cvs.append({
+                "nom_fichier": nom_fichier,
+                # "texte_pdf": texte,
+                "predict":  predict1
+            })
+            doc.close()
+
+    return JsonResponse({"contenu_cvs": contenu_cvs})
