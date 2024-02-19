@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 class Campagne(models.Model):
     nom = models.CharField(max_length=255, blank=False, default="")
-    description = models.TextField(default="", blank=False)
+    description_poste = models.TextField(default="", blank=False)
     intitule_poste = models.CharField(max_length=255, blank=False, default="")
     minimum_number_of_languages = models.IntegerField(default=0)
     minimum_number_of_experiences = models.IntegerField(default=0)

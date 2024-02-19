@@ -66,7 +66,7 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def lire_contenu_pdf(request):
-    campagne = get_object_or_404(Campagne, id=6)
+    campagne = get_object_or_404(Campagne, id=9)
 
     fname = './uploads/Alice Clark CV.pdf'
     doc = fitz.open(fname)
@@ -76,9 +76,9 @@ def lire_contenu_pdf(request):
     prediction1 = CampaignConfig.nlp(text)
     prediction2 = CampaignConfig.spacy_nlp(text)
     descriptionPredicted1 = CampaignConfig.spacy_nlp(
-        campagne.description)
+        campagne.description_poste)
     descriptionPredicted2 = CampaignConfig.spacy_nlp(
-        campagne.description)
+        campagne.description_poste)
     intitulePostePredicted1 = CampaignConfig.spacy_nlp(
         campagne.intitule_poste)
     intitulePostePredicted2 = CampaignConfig.spacy_nlp(
@@ -109,6 +109,8 @@ def lire_contenu_pdf(request):
     certifications = []
     experiences = []
     degree = []
+    descriptions = []
+    intitules = []
 
     # One
     for ent in prediction1.ents:
@@ -189,16 +191,14 @@ def lire_contenu_pdf(request):
 
     # return JsonResponse({"texte_pdf": CampagneSerializer(campagne).data})
 
-    """
-    descriptionPredictionSkills = []
-    descriptionPredictionMisc = []
-    descriptionPredictionORG = []
-    intitulePostePredictionSkills = []
-    intitulePostePredictionMisc = []
-    intitulePostePredictionORG = []
+    descriptions.extend(descriptionPredictionSkills)
+    descriptions.extend(descriptionPredictionORG)
+    descriptions.extend(descriptionPredictionMisc)
+    intitules.extend(intitulePostePredictionMisc)
+    intitules.extend(intitulePostePredictionORG)
+    intitules.extend(intitulePostePredictionMisc)
 
-    """
-    return JsonResponse({"degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
+    return JsonResponse({"descriptions": descriptions, "intitules": intitules, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
 
 
 def charger_contenu_pdfs(request):

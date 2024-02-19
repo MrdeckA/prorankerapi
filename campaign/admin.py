@@ -3,7 +3,7 @@ from .models import Campagne, Candidat, Collaborateur
 
 
 class CampagneAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'description', 'intitule_poste')
+    list_display = ('nom', 'description_poste', 'intitule_poste')
 
 
 class CandidatAdmin(admin.ModelAdmin):
