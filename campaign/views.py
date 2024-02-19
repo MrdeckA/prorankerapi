@@ -26,6 +26,7 @@ import django_filters
 
 from django_filters import rest_framework as filters
 from .filters import CollaborateurFilter, CampagneFilter, CandidatFilter
+from django.shortcuts import get_object_or_404
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -65,12 +66,139 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def lire_contenu_pdf(request):
-    fname = './uploads/cv1.pdf'
+    campagne = get_object_or_404(Campagne, id=6)
+
+    fname = './uploads/Alice Clark CV.pdf'
     doc = fitz.open(fname)
     text = " "
     for page in doc:
         text = text + str(page.get_text())
-    return JsonResponse({"texte_pdf": text})
+    prediction1 = CampaignConfig.nlp(text)
+    prediction2 = CampaignConfig.spacy_nlp(text)
+    descriptionPredicted1 = CampaignConfig.spacy_nlp(
+        campagne.description)
+    descriptionPredicted2 = CampaignConfig.spacy_nlp(
+        campagne.description)
+    intitulePostePredicted1 = CampaignConfig.spacy_nlp(
+        campagne.intitule_poste)
+    intitulePostePredicted2 = CampaignConfig.spacy_nlp(
+        campagne.intitule_poste)
+
+    # descriptionPredicted = nl
+
+    globalPredictionSkills = []
+    globalPredictionMisc = []
+    globalPredictionORG = []
+    descriptionPredictionSkills = []
+    descriptionPredictionMisc = []
+    descriptionPredictionORG = []
+    intitulePostePredictionSkills = []
+    intitulePostePredictionMisc = []
+    intitulePostePredictionORG = []
+    nom_complet = ""
+    email = ""
+    languages = []
+    skills = []
+    minimum_number_of_languages = []
+    minimum_number_of_experiences = []
+    minimum_number_of_years_of_experience = []
+    minimum_degree = []
+    has_awards = []
+    has_certifications = []
+    awards = []
+    certifications = []
+    experiences = []
+    degree = []
+
+    # One
+    for ent in prediction1.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        print(f"{ent.text}  ->>>  {ent.label_}\n")
+
+    predict1 = []
+    for ent in prediction1.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        predict1.append(ligne)
+        if ent.label_ == 'SKILLS':
+            globalPredictionSkills.append(ent.text)
+        if ent.label_ == 'NAME':
+            nom_complet = ent.text
+        if ent.label_ == 'EMAIL ADDRESS':
+            email = ent.text
+        if ent.label_ == 'LANGUAGE':
+            languages.append(ent.text)
+        if ent.label_ == 'YEARS OF EXPERIENCE':
+            experiences.append(ent.text)
+        if ent.label_ == 'DEGREE':
+            degree.append(ent.text)
+        if ent.label_ == 'AWARDS':
+            awards.append(ent.text)
+        if ent.label_ == 'CERTIFICATION':
+            certifications.append(ent.text)
+
+    predict2 = []
+    for ent in prediction2.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        predict2.append(ligne)
+        if ent.label_ == 'MISC':
+            globalPredictionMisc.append(ent.text)
+        if ent.label_ == 'ORG':
+            globalPredictionORG.append(ent.text)
+
+    # Two
+
+    descriptionPredict1 = []
+    for ent in descriptionPredicted1.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        descriptionPredict1.append(ligne)
+        if ent.label_ == 'SKILLS':
+            descriptionPredictionSkills.append(ent.text)
+
+    descriptionPredict2 = []
+    for ent in descriptionPredicted2.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        descriptionPredict2.append(ligne)
+        if ent.label_ == 'MISC':
+            descriptionPredictionMisc.append(ent.text)
+        if ent.label_ == 'ORG':
+            descriptionPredictionORG.append(ent.text)
+
+    # Three
+
+    intitulePostePredict1 = []
+    for ent in intitulePostePredicted1.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        intitulePostePredict1.append(ligne)
+        if ent.label_ == 'SKILLS':
+            intitulePostePredictionSkills.append(ent.text)
+
+    intitulePostePredict2 = []
+    for ent in intitulePostePredicted2.ents:
+        # Écrire le texte et l'étiquette de l'entité dans le fichier
+        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
+        intitulePostePredict2.append(ligne)
+        if ent.label_ == 'MISC':
+            intitulePostePredictionMisc.append(ent.text)
+        if ent.label_ == 'ORG':
+            intitulePostePredictionORG.append(ent.text)
+
+    # return JsonResponse({"texte_pdf": CampagneSerializer(campagne).data})
+
+    """
+    descriptionPredictionSkills = []
+    descriptionPredictionMisc = []
+    descriptionPredictionORG = []
+    intitulePostePredictionSkills = []
+    intitulePostePredictionMisc = []
+    intitulePostePredictionORG = []
+
+    """
+    return JsonResponse({"degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
 
 
 def charger_contenu_pdfs(request):
