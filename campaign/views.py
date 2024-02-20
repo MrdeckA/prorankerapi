@@ -229,14 +229,23 @@ def lire_contenu_pdf(request):
         chaine) for chaine in campagne.languages.split(',')]
     languages = [normaliser_chaine(
         chaine) for chaine in languages]
-    print(languages, campagne_languages)
+    # print(languages, campagne_languages)
     for chaine1 in campagne_languages:
         if any(chaine1 in chaine2 for chaine2 in languages):
             print(chaine1)
             score += 1
 
+    # skills
+    campagne_skills = [normaliser_chaine(
+        chaine) for chaine in campagne.skills.split(',')]
+
+    for chaine1 in campagne_skills:
+        if any(chaine1 in chaine2 for chaine2 in predictions):
+            print(chaine1)
+            score += 1
+    # skills end
+
     experiences_count = len(experiences)
-    degree_count = len(degree)
     awards_count = len(awards)
     certifications_count = len(certifications)
 
@@ -265,21 +274,18 @@ def lire_contenu_pdf(request):
         "Agrégation": ["Agrégation"]
     }
 
+    # To do next time
     for chaine1 in [normaliser_chaine(
-            chaine) for chaine in diplomes["Master (M1, M2)"]]:
+            chaine) for chaine in diplomes[campagne.minimum_degree]]:
         if any(chaine1 in chaine2 for chaine2 in [normaliser_chaine(
                 chaine) for chaine in degree]):
             print(chaine1)
             score += 1
 
-    print([normaliser_chaine(
-        chaine) for chaine in diplomes["Master (M1, M2)"]], [normaliser_chaine(
-            chaine) for chaine in degree])
-
     # Afficher le score
     print("Score:", score)
 
-    return JsonResponse({"description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
+    return JsonResponse({"skills": skills, "description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
 
 
 def normaliser_chaine(chaine):
