@@ -27,6 +27,8 @@ import django_filters
 from django_filters import rest_framework as filters
 from .filters import CollaborateurFilter, CampagneFilter, CandidatFilter
 from django.shortcuts import get_object_or_404
+import re
+from unidecode import unidecode
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -68,7 +70,7 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 def lire_contenu_pdf(request):
     campagne = get_object_or_404(Campagne, id=9)
 
-    fname = './uploads/Alice Clark CV.pdf'
+    fname = './uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'
     doc = fitz.open(fname)
     text = " "
     for page in doc:
@@ -111,6 +113,7 @@ def lire_contenu_pdf(request):
     degree = []
     descriptions = []
     intitules = []
+    predictions = []
 
     # One
     for ent in prediction1.ents:
@@ -197,8 +200,111 @@ def lire_contenu_pdf(request):
     intitules.extend(intitulePostePredictionMisc)
     intitules.extend(intitulePostePredictionORG)
     intitules.extend(intitulePostePredictionMisc)
+    predictions.extend(globalPredictionMisc)
+    predictions.extend(globalPredictionORG)
+    predictions.extend(globalPredictionSkills)
+    description_intitule = []
+    description_intitule.extend(descriptions)
+    description_intitule.extend(intitules)
 
-    return JsonResponse({"descriptions": descriptions, "intitules": intitules, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
+    description_intitule = [normaliser_chaine(
+        chaine) for chaine in description_intitule]
+    predictions = [normaliser_chaine(
+        chaine) for chaine in predictions]
+
+    # Initialiser la variable de score
+    score = 0
+    description_intitule.append("test")
+    predictions.append("test1")
+
+    # Vérifier chaque chaîne du tableau1 par rapport au tableau2
+    for chaine1 in description_intitule:
+        if any(chaine1 in chaine2 for chaine2 in predictions):
+            print(chaine1)
+            score += 1
+
+    # language
+    languages_count = len(languages)
+    campagne_languages = [normaliser_chaine(
+        chaine) for chaine in campagne.languages.split(',')]
+    languages = [normaliser_chaine(
+        chaine) for chaine in languages]
+    print(languages, campagne_languages)
+    for chaine1 in campagne_languages:
+        if any(chaine1 in chaine2 for chaine2 in languages):
+            print(chaine1)
+            score += 1
+
+    experiences_count = len(experiences)
+    degree_count = len(degree)
+    awards_count = len(awards)
+    certifications_count = len(certifications)
+
+    if awards_count > 0:
+        score += 1
+    if certifications_count > 0:
+        score += 1
+
+    if experiences_count >= campagne.minimum_number_of_experiences:
+        score += 1
+    if languages_count >= campagne.minimum_number_of_languages:
+        score += 1
+
+    diplomes = {
+        "Diplôme d'études primaires (DEP)": ["DEP", "Diplôme d'études primaires"],
+        "Brevet d'études du premier cycle (BEPC)": ["BEPC", "Brevet d'études du premier cycle"],
+        "Baccalauréat (BAC)": ["BAC", "Baccalauréat"],
+        "Licence (L1, L2, L3)": ["Licence", "L1", "L2", "L3"],
+        "Master (M1, M2)": ["Master", "M1", "M2"],
+        "Doctorat (Ph.D.)": ["Doctorat", "Ph.D."],
+        "Certificat d'aptitude professionnelle (CAP)": ["CAP", "Certificat d'aptitude professionnelle"],
+        "Brevet de technicien supérieur (BTS)": ["BTS", "Brevet de technicien supérieur"],
+        "Diplôme universitaire de technologie (DUT)": ["DUT", "Diplôme universitaire de technologie"],
+        "Certificat universitaire (CU)": ["CU", "Certificat universitaire"],
+        "Mastère spécialisé (MS)": ["MS", "Mastère spécialisé"],
+        "Agrégation": ["Agrégation"]
+    }
+
+    for chaine1 in [normaliser_chaine(
+            chaine) for chaine in diplomes["Master (M1, M2)"]]:
+        if any(chaine1 in chaine2 for chaine2 in [normaliser_chaine(
+                chaine) for chaine in degree]):
+            print(chaine1)
+            score += 1
+
+    print([normaliser_chaine(
+        chaine) for chaine in diplomes["Master (M1, M2)"]], [normaliser_chaine(
+            chaine) for chaine in degree])
+
+    # Afficher le score
+    print("Score:", score)
+
+    return JsonResponse({"description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'prediction1': predict1, 'prediction2': predict2, 'description1': descriptionPredict1, 'description2': descriptionPredict2, 'intitulePostePredict1': intitulePostePredict1, 'intitulePostePredict2': intitulePostePredict2})
+
+
+def normaliser_chaine(chaine):
+    # Supprimer les espaces
+    chaine = chaine.replace(" ", "")
+
+    # Convertir en minuscules
+    chaine = chaine.lower()
+
+    # Supprimer les caractères spéciaux
+    # chaine = re.sub(r'[^a-zA-Z]', '', chaine)
+
+    # Supprimer les traits d'union ou les points
+    chaine = chaine.replace("-", "").replace(".", "")
+
+    # Supprimer les chiffres et les versions
+    chaine = re.sub(r'\d+(\.\d+)?', '', chaine)
+
+    # Remplacer les caractères accentués par leur forme sans accent
+    chaine = unidecode(chaine)
+
+    # Supprimer les apostrophes et les '/'
+    chaine = chaine.replace("'", "").replace("/", "")
+
+    return chaine
 
 
 def charger_contenu_pdfs(request):
