@@ -85,15 +85,9 @@ def lire_contenu_pdf(request):
     intitule_poste_prediction_model_spacy = CampaignConfig.spacy_nlp(
         campagne.intitule_poste)
 
-    global_prediction_skills = []
-    global_prediction_misc = []
-    global_prediction_org = []
-    description_prediction_skills = []
-    description_prediction_misc = []
-    description_prediction_org = []
-    intitule_poste_prediction_skills = []
-    intitule_poste_prediction_misc = []
-    intitule_poste_prediction_org = []
+    predictions = []
+    descriptions = []
+    intitules = []
     nom_complet = ""
     email = ""
     languages = []
@@ -104,7 +98,7 @@ def lire_contenu_pdf(request):
 
     for ent in prediction_mon_model.ents:
         if ent.label_ in ('SKILLS', 'DESIGNATION', 'WORKED AS', 'COMPANIES WORKED AT'):
-            global_prediction_skills.append(ent.text)
+            predictions.append(ent.text)
         elif ent.label_ == 'NAME':
             nom_complet = ent.text
         elif ent.label_ == 'EMAIL ADDRESS':
@@ -122,36 +116,30 @@ def lire_contenu_pdf(request):
 
     for ent in prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            global_prediction_misc.append(ent.text)
+            predictions.append(ent.text)
         elif ent.label_ == 'ORG':
-            global_prediction_org.append(ent.text)
+            predictions.append(ent.text)
 
     for ent in description_prediction_mon_model.ents:
         if ent.label_ == 'SKILLS':
-            description_prediction_skills.append(ent.text)
+            descriptions.append(ent.text)
 
     for ent in description_prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            description_prediction_misc.append(ent.text)
+            descriptions.append(ent.text)
         elif ent.label_ == 'ORG':
-            description_prediction_org.append(ent.text)
+            descriptions.append(ent.text)
 
     for ent in intitule_poste_prediction_mon_model.ents:
         if ent.label_ == 'SKILLS':
-            intitule_poste_prediction_skills.append(ent.text)
+            intitules.append(ent.text)
 
     for ent in intitule_poste_prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            intitule_poste_prediction_misc.append(ent.text)
+            intitules.append(ent.text)
         elif ent.label_ == 'ORG':
-            intitule_poste_prediction_org.append(ent.text)
+            intitules.append(ent.text)
 
-    descriptions = description_prediction_skills + \
-        description_prediction_org + description_prediction_misc
-    intitules = intitule_poste_prediction_misc + \
-        intitule_poste_prediction_org + intitule_poste_prediction_skills
-    predictions = global_prediction_misc + \
-        global_prediction_org + global_prediction_skills
     description_intitule = descriptions + intitules
 
     description_intitule = [normaliser_chaine(
@@ -217,15 +205,6 @@ def lire_contenu_pdf(request):
         "languages": languages,
         "email": email,
         "nom_complet": nom_complet,
-        "globalPredictionMisc": global_prediction_misc,
-        "globalPredictionORG": global_prediction_org,
-        "globalPredictionSkills": global_prediction_skills,
-        "descriptionPredictionORG": description_prediction_org,
-        "descriptionPredictionMisc": description_prediction_misc,
-        "descriptionPredictionSkills": description_prediction_skills,
-        "intitulePostePredictionORG": intitule_poste_prediction_org,
-        "intitulePostePredictionMisc": intitule_poste_prediction_misc,
-        "intitulePostePredictionSkills": intitule_poste_prediction_skills,
         "texte_pdf": text
     }
 
