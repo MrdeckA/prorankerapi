@@ -75,13 +75,16 @@ def lire_contenu_pdf(request):
     text = " "
     for page in doc:
         text = text + str(page.get_text())
-    prediction1 = CampaignConfig.my_nlp(text)
-    prediction2 = CampaignConfig.spacy_nlp(text)
-    descriptionPredicted1 = CampaignConfig.my_nlp(campagne.description_poste)
-    descriptionPredicted2 = CampaignConfig.spacy_nlp(
+    predictionMonModel = CampaignConfig.my_nlp(text)
+    predictionModelSpacy = CampaignConfig.spacy_nlp(text)
+    descriptionpredictionMonModel = CampaignConfig.my_nlp(
         campagne.description_poste)
-    intitulePostePredicted1 = CampaignConfig.my_nlp(campagne.intitule_poste)
-    intitulePostePredicted2 = CampaignConfig.spacy_nlp(campagne.intitule_poste)
+    descriptionpredictionModelSpacy = CampaignConfig.spacy_nlp(
+        campagne.description_poste)
+    intitulePostepredictionMonModel = CampaignConfig.my_nlp(
+        campagne.intitule_poste)
+    intitulePostepredictionModelSpacy = CampaignConfig.spacy_nlp(
+        campagne.intitule_poste)
 
     globalPredictionSkills = []
     globalPredictionMisc = []
@@ -104,7 +107,7 @@ def lire_contenu_pdf(request):
     predictions = []
 
     # One
-    for ent in prediction1.ents:
+    for ent in predictionMonModel.ents:
 
         if ent.label_ == 'SKILLS' or ent.label_ == 'DESIGNATION' or ent.label_ == 'WORKED AS' or ent.label_ == 'COMPANIES WORKED AT':
             globalPredictionSkills.append(ent.text)
@@ -123,7 +126,7 @@ def lire_contenu_pdf(request):
         if ent.label_ == 'CERTIFICATION':
             certifications.append(ent.text)
 
-    for ent in prediction2.ents:
+    for ent in predictionModelSpacy.ents:
         if ent.label_ == 'MISC':
             globalPredictionMisc.append(ent.text)
         if ent.label_ == 'ORG':
@@ -131,11 +134,11 @@ def lire_contenu_pdf(request):
 
     # Two
 
-    for ent in descriptionPredicted1.ents:
+    for ent in descriptionpredictionMonModel.ents:
         if ent.label_ == 'SKILLS':
             descriptionPredictionSkills.append(ent.text)
 
-    for ent in descriptionPredicted2.ents:
+    for ent in descriptionpredictionModelSpacy.ents:
         if ent.label_ == 'MISC':
             descriptionPredictionMisc.append(ent.text)
         if ent.label_ == 'ORG':
@@ -143,11 +146,11 @@ def lire_contenu_pdf(request):
 
     # Three
 
-    for ent in intitulePostePredicted1.ents:
+    for ent in intitulePostepredictionMonModel.ents:
         if ent.label_ == 'SKILLS':
             intitulePostePredictionSkills.append(ent.text)
 
-    for ent in intitulePostePredicted2.ents:
+    for ent in intitulePostepredictionModelSpacy.ents:
         if ent.label_ == 'MISC':
             intitulePostePredictionMisc.append(ent.text)
         if ent.label_ == 'ORG':
