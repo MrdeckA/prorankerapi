@@ -69,32 +69,31 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 def lire_contenu_pdf(request):
     campagne = get_object_or_404(Campagne, id=9)
-
-    fname = './uploads/CV18.pdf'
+    fname = './uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'
     doc = fitz.open(fname)
-    text = " "
-    for page in doc:
-        text = text + str(page.get_text())
-    predictionMonModel = CampaignConfig.my_nlp(text)
-    predictionModelSpacy = CampaignConfig.spacy_nlp(text)
-    descriptionpredictionMonModel = CampaignConfig.my_nlp(
+    text = "".join(page.get_text() for page in doc)
+    doc.close()
+
+    prediction_mon_model = CampaignConfig.my_nlp(text)
+    prediction_model_spacy = CampaignConfig.spacy_nlp(text)
+    description_prediction_mon_model = CampaignConfig.my_nlp(
         campagne.description_poste)
-    descriptionpredictionModelSpacy = CampaignConfig.spacy_nlp(
+    description_prediction_model_spacy = CampaignConfig.spacy_nlp(
         campagne.description_poste)
-    intitulePostepredictionMonModel = CampaignConfig.my_nlp(
+    intitule_poste_prediction_mon_model = CampaignConfig.my_nlp(
         campagne.intitule_poste)
-    intitulePostepredictionModelSpacy = CampaignConfig.spacy_nlp(
+    intitule_poste_prediction_model_spacy = CampaignConfig.spacy_nlp(
         campagne.intitule_poste)
 
-    globalPredictionSkills = []
-    globalPredictionMisc = []
-    globalPredictionORG = []
-    descriptionPredictionSkills = []
-    descriptionPredictionMisc = []
-    descriptionPredictionORG = []
-    intitulePostePredictionSkills = []
-    intitulePostePredictionMisc = []
-    intitulePostePredictionORG = []
+    global_prediction_skills = []
+    global_prediction_misc = []
+    global_prediction_org = []
+    description_prediction_skills = []
+    description_prediction_misc = []
+    description_prediction_org = []
+    intitule_poste_prediction_skills = []
+    intitule_poste_prediction_misc = []
+    intitule_poste_prediction_org = []
     nom_complet = ""
     email = ""
     languages = []
@@ -102,118 +101,90 @@ def lire_contenu_pdf(request):
     certifications = []
     experiences = []
     degree = []
-    descriptions = []
-    intitules = []
-    predictions = []
 
-    # One
-    for ent in predictionMonModel.ents:
-
-        if ent.label_ == 'SKILLS' or ent.label_ == 'DESIGNATION' or ent.label_ == 'WORKED AS' or ent.label_ == 'COMPANIES WORKED AT':
-            globalPredictionSkills.append(ent.text)
-        if ent.label_ == 'NAME':
+    for ent in prediction_mon_model.ents:
+        if ent.label_ in ('SKILLS', 'DESIGNATION', 'WORKED AS', 'COMPANIES WORKED AT'):
+            global_prediction_skills.append(ent.text)
+        elif ent.label_ == 'NAME':
             nom_complet = ent.text
-        if ent.label_ == 'EMAIL ADDRESS':
+        elif ent.label_ == 'EMAIL ADDRESS':
             email = ent.text
-        if ent.label_ == 'LANGUAGE':
+        elif ent.label_ == 'LANGUAGE':
             languages.append(ent.text)
-        if ent.label_ == 'YEARS OF EXPERIENCE':
+        elif ent.label_ == 'YEARS OF EXPERIENCE':
             experiences.append(ent.text)
-        if ent.label_ == 'DEGREE':
+        elif ent.label_ == 'DEGREE':
             degree.append(ent.text)
-        if ent.label_ == 'AWARDS':
+        elif ent.label_ == 'AWARDS':
             awards.append(ent.text)
-        if ent.label_ == 'CERTIFICATION':
+        elif ent.label_ == 'CERTIFICATION':
             certifications.append(ent.text)
 
-    for ent in predictionModelSpacy.ents:
+    for ent in prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            globalPredictionMisc.append(ent.text)
-        if ent.label_ == 'ORG':
-            globalPredictionORG.append(ent.text)
+            global_prediction_misc.append(ent.text)
+        elif ent.label_ == 'ORG':
+            global_prediction_org.append(ent.text)
 
-    # Two
-
-    for ent in descriptionpredictionMonModel.ents:
+    for ent in description_prediction_mon_model.ents:
         if ent.label_ == 'SKILLS':
-            descriptionPredictionSkills.append(ent.text)
+            description_prediction_skills.append(ent.text)
 
-    for ent in descriptionpredictionModelSpacy.ents:
+    for ent in description_prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            descriptionPredictionMisc.append(ent.text)
-        if ent.label_ == 'ORG':
-            descriptionPredictionORG.append(ent.text)
+            description_prediction_misc.append(ent.text)
+        elif ent.label_ == 'ORG':
+            description_prediction_org.append(ent.text)
 
-    # Three
-
-    for ent in intitulePostepredictionMonModel.ents:
+    for ent in intitule_poste_prediction_mon_model.ents:
         if ent.label_ == 'SKILLS':
-            intitulePostePredictionSkills.append(ent.text)
+            intitule_poste_prediction_skills.append(ent.text)
 
-    for ent in intitulePostepredictionModelSpacy.ents:
+    for ent in intitule_poste_prediction_model_spacy.ents:
         if ent.label_ == 'MISC':
-            intitulePostePredictionMisc.append(ent.text)
-        if ent.label_ == 'ORG':
-            intitulePostePredictionORG.append(ent.text)
+            intitule_poste_prediction_misc.append(ent.text)
+        elif ent.label_ == 'ORG':
+            intitule_poste_prediction_org.append(ent.text)
 
-    descriptions.extend(descriptionPredictionSkills)
-    descriptions.extend(descriptionPredictionORG)
-    descriptions.extend(descriptionPredictionMisc)
-    intitules.extend(intitulePostePredictionMisc)
-    intitules.extend(intitulePostePredictionORG)
-    intitules.extend(intitulePostePredictionMisc)
-    predictions.extend(globalPredictionMisc)
-    predictions.extend(globalPredictionORG)
-    predictions.extend(globalPredictionSkills)
-    description_intitule = []
-    description_intitule.extend(descriptions)
-    description_intitule.extend(intitules)
+    descriptions = description_prediction_skills + \
+        description_prediction_org + description_prediction_misc
+    intitules = intitule_poste_prediction_misc + \
+        intitule_poste_prediction_org + intitule_poste_prediction_skills
+    predictions = global_prediction_misc + \
+        global_prediction_org + global_prediction_skills
+    description_intitule = descriptions + intitules
 
     description_intitule = [normaliser_chaine(
         chaine) for chaine in description_intitule]
-    predictions = [normaliser_chaine(
-        chaine) for chaine in predictions]
+    predictions = [normaliser_chaine(chaine) for chaine in predictions]
 
     # Initialiser la variable de score
-    score = 0
-
-    for chaine1 in description_intitule:
-        if any(chaine1 in chaine2 for chaine2 in predictions):
-            score += 1
+    score = sum(any(chaine1 in chaine2 for chaine2 in predictions)
+                for chaine1 in description_intitule)
 
     # language
     languages_count = len(languages)
     campagne_languages = [normaliser_chaine(
         chaine) for chaine in campagne.languages.split(',')]
-    languages = [normaliser_chaine(
-        chaine) for chaine in languages]
-
-    for chaine1 in campagne_languages:
-        if any(chaine1 in chaine2 for chaine2 in languages):
-            score += 1
+    languages = [normaliser_chaine(chaine) for chaine in languages]
+    score += sum(any(chaine1 in chaine2 for chaine2 in languages)
+                 for chaine1 in campagne_languages)
 
     # skills
-    campagne_skills = [normaliser_chaine(
-        chaine) for chaine in campagne.skills.split(',')]
+    campagne_skills = [normaliser_chaine(chaine)
+                       for chaine in campagne.skills.split(',')]
+    score += sum(any(chaine1 in chaine2 for chaine2 in predictions)
+                 for chaine1 in campagne_skills)
 
-    for chaine1 in campagne_skills:
-        if any(chaine1 in chaine2 for chaine2 in predictions):
-            score += 1
-    # skills end
-
+    # autres critères
     experiences_count = len(experiences)
     awards_count = len(awards)
     certifications_count = len(certifications)
 
-    if awards_count > 0:
-        score += 1
-    if certifications_count > 0:
-        score += 1
-
-    if experiences_count >= campagne.minimum_number_of_experiences:
-        score += 1
-    if languages_count >= campagne.minimum_number_of_languages:
-        score += 1
+    score += awards_count > 0
+    score += certifications_count > 0
+    score += experiences_count >= campagne.minimum_number_of_experiences
+    score += languages_count >= campagne.minimum_number_of_languages
 
     diplomes = {
         "Diplôme d'études primaires (DEP)": ["DEP", "Diplôme d'études primaires"],
@@ -229,32 +200,42 @@ def lire_contenu_pdf(request):
         "Mastère spécialisé (MS)": ["MS", "Mastère spécialisé"],
         "Agrégation": ["Agrégation"]
     }
+    degree = [normaliser_chaine(chaine) for chaine in degree]
+    campagne_diplome = [normaliser_chaine(
+        chaine) for chaine in diplomes[campagne.minimum_degree]]
+    score += any(chaine1 in chaine2 for chaine1 in campagne_diplome for chaine2 in degree)
 
-    # To do next time
-    for chaine1 in [normaliser_chaine(
-            chaine) for chaine in diplomes[campagne.minimum_degree]]:
-        if any(chaine1 in chaine2 for chaine2 in [normaliser_chaine(
-                chaine) for chaine in degree]):
-            score += 1
+    data = {
+        "score": score,
+        "description_intitule": description_intitule,
+        "intitules": intitules,
+        "predictions": predictions,
+        "degree": degree,
+        "experiences": experiences,
+        "certifications": certifications,
+        "awards": awards,
+        "languages": languages,
+        "email": email,
+        "nom_complet": nom_complet,
+        "globalPredictionMisc": global_prediction_misc,
+        "globalPredictionORG": global_prediction_org,
+        "globalPredictionSkills": global_prediction_skills,
+        "descriptionPredictionORG": description_prediction_org,
+        "descriptionPredictionMisc": description_prediction_misc,
+        "descriptionPredictionSkills": description_prediction_skills,
+        "intitulePostePredictionORG": intitule_poste_prediction_org,
+        "intitulePostePredictionMisc": intitule_poste_prediction_misc,
+        "intitulePostePredictionSkills": intitule_poste_prediction_skills,
+        "texte_pdf": text
+    }
 
-    # Afficher le score
-    print("Score:", score)
-
-    return JsonResponse({"score": score, "description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text})
+    return JsonResponse({"score": score})
 
 
 def normaliser_chaine(chaine):
-    # Supprimer les espaces
-    chaine = chaine.replace(" ", "")
 
     # Convertir en minuscules
     chaine = chaine.lower()
-
-    # Supprimer les caractères spéciaux
-    # chaine = re.sub(r'[^a-zA-Z]', '', chaine)
-
-    # Supprimer les traits d'union ou les points
-    chaine = chaine.replace("-", "").replace(".", "")
 
     # Supprimer les chiffres et les versions
     chaine = re.sub(r'\d+(\.\d+)?', '', chaine)
@@ -262,8 +243,10 @@ def normaliser_chaine(chaine):
     # Remplacer les caractères accentués par leur forme sans accent
     chaine = unidecode(chaine)
 
-    # Supprimer les apostrophes et les '/'
-    chaine = chaine.replace("'", "").replace("/", "")
+    # Supprimer les apostrophes et les '/' et les espaces
+    # Supprimer les traits d'union ou les points
+    chaine = chaine.replace("'", "").replace(
+        "/", "").replace(" ", "").replace("-", "").replace(".", "")
 
     return chaine
 
