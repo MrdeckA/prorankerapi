@@ -19,6 +19,8 @@ class CampaignConfig(AppConfig):
     # Charger le modèle spaCy pour le français en grande taille
     spacy_nlp = load_nlp_model("fr_core_news_md")
 
+    my_nlp = nlp
+
     # def ready(self):
     # Chargez votre modèle spaCy ou exécutez d'autres actions au démarrage de l'application
     # self.nlp = nlp

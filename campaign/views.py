@@ -70,21 +70,18 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 def lire_contenu_pdf(request):
     campagne = get_object_or_404(Campagne, id=9)
 
-    fname = './uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'
+    fname = './uploads/CV18.pdf'
     doc = fitz.open(fname)
     text = " "
     for page in doc:
         text = text + str(page.get_text())
-    prediction1 = CampaignConfig.nlp(text)
+    prediction1 = CampaignConfig.my_nlp(text)
     prediction2 = CampaignConfig.spacy_nlp(text)
-    descriptionPredicted1 = CampaignConfig.spacy_nlp(
-        campagne.description_poste)
+    descriptionPredicted1 = CampaignConfig.my_nlp(campagne.description_poste)
     descriptionPredicted2 = CampaignConfig.spacy_nlp(
         campagne.description_poste)
-    intitulePostePredicted1 = CampaignConfig.spacy_nlp(
-        campagne.intitule_poste)
-    intitulePostePredicted2 = CampaignConfig.spacy_nlp(
-        campagne.intitule_poste)
+    intitulePostePredicted1 = CampaignConfig.my_nlp(campagne.intitule_poste)
+    intitulePostePredicted2 = CampaignConfig.spacy_nlp(campagne.intitule_poste)
 
     globalPredictionSkills = []
     globalPredictionMisc = []
@@ -98,7 +95,6 @@ def lire_contenu_pdf(request):
     nom_complet = ""
     email = ""
     languages = []
-    skills = []
     awards = []
     certifications = []
     experiences = []
@@ -107,9 +103,10 @@ def lire_contenu_pdf(request):
     intitules = []
     predictions = []
 
+    # One
     for ent in prediction1.ents:
 
-        if ent.label_ == 'SKILLS':
+        if ent.label_ == 'SKILLS' or ent.label_ == 'DESIGNATION' or ent.label_ == 'WORKED AS' or ent.label_ == 'COMPANIES WORKED AT':
             globalPredictionSkills.append(ent.text)
         if ent.label_ == 'NAME':
             nom_complet = ent.text
@@ -138,11 +135,7 @@ def lire_contenu_pdf(request):
         if ent.label_ == 'SKILLS':
             descriptionPredictionSkills.append(ent.text)
 
-    descriptionPredict2 = []
     for ent in descriptionPredicted2.ents:
-        # Écrire le texte et l'étiquette de l'entité dans le fichier
-        ligne = f"{ent.text}  ->>>  {ent.label_}\n"
-        descriptionPredict2.append(ligne)
         if ent.label_ == 'MISC':
             descriptionPredictionMisc.append(ent.text)
         if ent.label_ == 'ORG':
@@ -159,8 +152,6 @@ def lire_contenu_pdf(request):
             intitulePostePredictionMisc.append(ent.text)
         if ent.label_ == 'ORG':
             intitulePostePredictionORG.append(ent.text)
-
-    # return JsonResponse({"texte_pdf": CampagneSerializer(campagne).data})
 
     descriptions.extend(descriptionPredictionSkills)
     descriptions.extend(descriptionPredictionORG)
@@ -182,13 +173,9 @@ def lire_contenu_pdf(request):
 
     # Initialiser la variable de score
     score = 0
-    description_intitule.append("test")
-    predictions.append("test1")
 
-    # Vérifier chaque chaîne du tableau1 par rapport au tableau2
     for chaine1 in description_intitule:
         if any(chaine1 in chaine2 for chaine2 in predictions):
-            print(chaine1)
             score += 1
 
     # language
@@ -197,10 +184,9 @@ def lire_contenu_pdf(request):
         chaine) for chaine in campagne.languages.split(',')]
     languages = [normaliser_chaine(
         chaine) for chaine in languages]
-    # print(languages, campagne_languages)
+
     for chaine1 in campagne_languages:
         if any(chaine1 in chaine2 for chaine2 in languages):
-            print(chaine1)
             score += 1
 
     # skills
@@ -209,7 +195,6 @@ def lire_contenu_pdf(request):
 
     for chaine1 in campagne_skills:
         if any(chaine1 in chaine2 for chaine2 in predictions):
-            print(chaine1)
             score += 1
     # skills end
 
@@ -247,13 +232,12 @@ def lire_contenu_pdf(request):
             chaine) for chaine in diplomes[campagne.minimum_degree]]:
         if any(chaine1 in chaine2 for chaine2 in [normaliser_chaine(
                 chaine) for chaine in degree]):
-            print(chaine1)
             score += 1
 
     # Afficher le score
     print("Score:", score)
 
-    return JsonResponse({"skills": skills, "description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text, 'description2': descriptionPredict2})
+    return JsonResponse({"description_intitule": description_intitule, "intitules": intitules, "predictions": predictions, "degree": degree, "experiences": experiences, "certifications": certifications, "awards": awards, "languages": languages, "email": email, "nom_complet": nom_complet, "globalPredictionMisc": globalPredictionMisc, "globalPredictionORG": globalPredictionORG,  "globalPredictionSkills": globalPredictionSkills, "descriptionPredictionORG": descriptionPredictionORG, "descriptionPredictionMisc": descriptionPredictionMisc, "descriptionPredictionSkills": descriptionPredictionSkills, "intitulePostePredictionORG": intitulePostePredictionORG,  "intitulePostePredictionMisc": intitulePostePredictionMisc, "intitulePostePredictionSkills": intitulePostePredictionSkills, "texte_pdf": text})
 
 
 def normaliser_chaine(chaine):
