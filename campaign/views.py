@@ -29,6 +29,7 @@ from .filters import CollaborateurFilter, CampagneFilter, CandidatFilter
 from django.shortcuts import get_object_or_404
 import re
 from unidecode import unidecode
+from collections import OrderedDict
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -68,8 +69,19 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def lire_contenu_pdf(request):
+    scores = {}
+    for i in range(1, 24):  # Boucle de cv1.pdf à cv22.pdf
+        nom_fichier = f'./uploads/cv{i}.pdf'
+        scores[nom_fichier] = lire_contenu_pdfs(fname=nom_fichier)
+        print(f"Done for {nom_fichier}")
+    valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
+
+    return JsonResponse({"response": valeurs_triees})
+
+
+def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
     campagne = get_object_or_404(Campagne, id=9)
-    fname = './uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'
+    fname = fname
     doc = fitz.open(fname)
     text = "".join(page.get_text() for page in doc)
     doc.close()
@@ -97,7 +109,9 @@ def lire_contenu_pdf(request):
     degree = []
 
     for ent in prediction_mon_model.ents:
-        if ent.label_ in ('SKILLS', 'DESIGNATION', 'WORKED AS', 'COMPANIES WORKED AT'):
+        if ent.label_ in ('SKILLS', 'DESIGNATION', 'WORKED AS', 'COMPANIES WORKED AT', 'DESIGNATION',
+                          'AWARDS',
+                          'CERTIFICATION'):
             predictions.append(ent.text)
         elif ent.label_ == 'NAME':
             nom_complet = ent.text
@@ -208,7 +222,7 @@ def lire_contenu_pdf(request):
         "texte_pdf": text
     }
 
-    return JsonResponse({"score": score})
+    return score
 
 
 def normaliser_chaine(chaine):
