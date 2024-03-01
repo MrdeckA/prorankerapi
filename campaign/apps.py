@@ -14,12 +14,12 @@ class CampaignConfig(AppConfig):
     name = "campaign"
     # to do
     # Charger le modèle spaCy lors de la première utilisation et le mettre en cache
-    nlp = load_nlp_model("./campaign/sauvegarde_model_best")
+    # nlp = load_nlp_model("./campaign/sauvegarde_model_best")
 
     # Charger le modèle spaCy pour le français en grande taille
-    spacy_nlp = load_nlp_model("fr_core_news_md")
+    # spacy_nlp = load_nlp_model("fr_core_news_md")
 
-    my_nlp = nlp
+    # my_nlp = nlp
 
     # def ready(self):
     # Chargez votre modèle spaCy ou exécutez d'autres actions au démarrage de l'application

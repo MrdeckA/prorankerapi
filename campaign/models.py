@@ -3,6 +3,9 @@ import sys
 import fitz
 
 from django.contrib.auth.models import User
+from rest_framework.response import Response
+from django.core.files.storage import FileSystemStorage
+from rest_framework import status
 
 
 class Campagne(models.Model):
@@ -11,12 +14,14 @@ class Campagne(models.Model):
     intitule_poste = models.CharField(max_length=255, blank=False, default="")
     minimum_number_of_languages = models.IntegerField(default=0)
     minimum_number_of_experiences = models.IntegerField(default=0)
-    minimum_number_of_years_of_experience = models.IntegerField(default=0)
     minimum_degree = models.CharField(max_length=255, default="")
     languages = models.TextField(blank=True, null=True)
     skills = models.TextField(blank=True, null=True)
     has_awards = models.BooleanField(default=False)
     has_certifications = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='campagnes', default=None, blank=False)
+    files = models.JSONField(blank=False, default=None)
 
     def __str__(self):
         return self.nom
@@ -40,7 +45,8 @@ class Candidat(models.Model):
 
 
 class Collaborateur(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='collaborateurs')
     campagne = models.ForeignKey(
         Campagne, on_delete=models.CASCADE, related_name='collaborateurs')
 

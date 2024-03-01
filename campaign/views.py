@@ -30,6 +30,10 @@ from django.shortcuts import get_object_or_404
 import re
 from unidecode import unidecode
 from collections import OrderedDict
+from utils.main import is_valid_email, recuperer_premiere_email
+from rest_framework.parsers import FileUploadParser, FormParser, MultiPartParser
+from rest_framework.decorators import api_view, parser_classes
+from django.core.files.storage import FileSystemStorage
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -37,6 +41,60 @@ class CampagneListeView(generics.ListCreateAPIView):
     serializer_class = CampagneSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CampagneFilter
+
+    def post(self, request):
+        try:
+            # print(request.FILES)
+            res = json.loads(request.data.get('model'))
+
+            saved_files = []
+
+            for key, fichier in request.FILES.items():
+                # Générer un nouveau nom pour le fichier (saving name)
+                saving_name = FileSystemStorage().get_available_name(fichier.name)
+
+                # Sauvegarder le fichier avec le nouveau nom
+                storage = FileSystemStorage()
+                storage.save(saving_name, fichier)
+
+                # Récupérer le nom d'origine du fichier (original name)
+                original_name = fichier.name
+
+                # Vous pouvez maintenant utiliser original_name et saving_name comme nécessaire
+
+                saved_file = {}
+                saved_file['original_name'] = original_name
+                saved_file['saving_name'] = saving_name
+                saved_files.append(saved_file)
+
+            newCampagne = Campagne(
+                nom=res.get('nom', ''),
+                description_poste=res.get('description_poste', ''),
+                intitule_poste=res.get('intitule_poste', ''),
+                minimum_number_of_languages=res.get(
+                    'minimum_number_of_languages', 0),
+                minimum_number_of_experiences=res.get(
+                    'minimum_number_of_experiences', 0),
+                minimum_degree=res.get('minimum_degree', ''),
+                languages=json.dumps(res.get('languages', [])),
+                skills=json.dumps(res.get('skills', [])),
+                has_awards=res.get('has_awards', False),
+                has_certifications=res.get('has_certifications', False),
+                user_id=res.get('user', ''),
+                files=saved_files
+            )
+            # print(res.get('nom'))
+            newCampagne.save()
+
+            # newCampagne.save()
+            # print(request.user)
+            # Boucle à travers tous les fichiers dans request.FILES
+
+            return Response({'message':  res}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CampagneDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -68,18 +126,35 @@ class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CollaborateurSerializer
 
 
-def lire_contenu_pdf(request):
+def make_ranking(request):
     scores = {}
-    for i in range(1, 24):  # Boucle de cv1.pdf à cv22.pdf
+    results = {}
+    for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
         nom_fichier = f'./uploads/cv{i}.pdf'
-        scores[nom_fichier] = lire_contenu_pdfs(fname=nom_fichier)
+        result = calculating_score_for_a_andidate(
+            fname=nom_fichier)
+        # email: data['email'], score: data["score"], nom_complet: data['nom_complet'],
+
+        scores[nom_fichier] = result['score']
+        results[nom_fichier] = result[f'{nom_fichier}']
         print(f"Done for {nom_fichier}")
-    valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
 
-    return JsonResponse({"response": valeurs_triees})
+    valeurs_triees = scores
+    # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
+    # print(result)
+
+    # for i in range(1, 5):
+    #     nom_fichier = f'./uploads/cv{i}.pdf'
+    #     scores[nom_fichier] = {
+    #         "email": result[nom_fichier]["email"],
+    #         "nom_complet": result[nom_fichier]["nom_complet"],
+    #         "score": result['score']
+    #     }
+
+    return JsonResponse({"response": scores, "other": results})
 
 
-def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
+def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
     campagne = get_object_or_404(Campagne, id=9)
     fname = fname
     doc = fitz.open(fname)
@@ -96,6 +171,10 @@ def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.p
         campagne.intitule_poste)
     intitule_poste_prediction_model_spacy = CampaignConfig.spacy_nlp(
         campagne.intitule_poste)
+
+    if fname == './uploads/cv21.pdf':
+        for txt in prediction_model_spacy.ents:
+            print(f'{txt.text} {txt.label_}')
 
     predictions = []
     descriptions = []
@@ -117,6 +196,7 @@ def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.p
             nom_complet = ent.text
         elif ent.label_ == 'EMAIL ADDRESS':
             email = ent.text
+
         elif ent.label_ == 'LANGUAGE':
             languages.append(ent.text)
         elif ent.label_ == 'YEARS OF EXPERIENCE':
@@ -207,6 +287,9 @@ def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.p
         chaine) for chaine in diplomes[campagne.minimum_degree]]
     score += any(chaine1 in chaine2 for chaine1 in campagne_diplome for chaine2 in degree)
 
+    if not is_valid_email(email):
+        email = recuperer_premiere_email(text)
+        print(fname, email)
     data = {
         "score": score,
         "description_intitule": description_intitule,
@@ -222,7 +305,12 @@ def lire_contenu_pdfs(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.p
         "texte_pdf": text
     }
 
-    return score
+    return {
+        f"{fname}": {
+            "email": data['email'],
+            "nom_complet": data['nom_complet']
+        }, "score": data["score"]
+    }
 
 
 def normaliser_chaine(chaine):
@@ -278,3 +366,39 @@ def charger_contenu_pdfs(request):
             doc.close()
 
     return JsonResponse({"contenu_cvs": contenu_cvs})
+
+
+@api_view(['POST'])
+@csrf_exempt
+def posting(request):
+    try:
+        # Boucle à travers tous les fichiers dans request.FILES
+        for key, fichier in request.FILES.items():
+            # Générer un nouveau nom pour le fichier (saving name)
+            saving_name = FileSystemStorage().get_available_name(fichier.name)
+
+            # Sauvegarder le fichier avec le nouveau nom
+            storage = FileSystemStorage()
+            storage.save(saving_name, fichier)
+
+            # Récupérer le nom d'origine du fichier (original name)
+            original_name = fichier.name
+
+            # Vous pouvez maintenant utiliser original_name et saving_name comme nécessaire
+            print("Nom d'origine:", original_name)
+            print("Nom de sauvegarde:", saving_name)
+
+        return Response({'message': 'Fichiers sauvegardés avec succès.'}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # fichier = request.FILES
+    # print(request.FILES)
+    # parser_classes = [FileUploadParser]
+
+    # # Logique pour sauvegarder le fichier, par exemple avec FileSystemStorage
+    # # Vous devrez ajuster cela en fonction de votre logique spécifique
+    # # storage = FileSystemStorage()
+    # # nom_fichier = storage.save(fichier.name, fichier)
+
+    # return JsonResponse({"contenu_cvs": "contenu_cvs"})
