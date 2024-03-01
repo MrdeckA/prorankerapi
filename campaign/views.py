@@ -6,7 +6,7 @@ import sys
 import fitz
 from rest_framework import generics
 from .models import Campagne, Candidat, Collaborateur
-from .serializers import CampagneSerializer, CandidatSerializer, CollaborateurSerializer
+from .serializers import CampagneSerializer, CandidatSerializer, CollaborateurSerializer, UserSerializer
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -34,6 +34,7 @@ from utils.main import is_valid_email, recuperer_premiere_email
 from rest_framework.parsers import FileUploadParser, FormParser, MultiPartParser
 from rest_framework.decorators import api_view, parser_classes
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.models import User
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -402,3 +403,81 @@ def posting(request):
     # # nom_fichier = storage.save(fichier.name, fichier)
 
     # return JsonResponse({"contenu_cvs": "contenu_cvs"})
+
+
+class ListeCampagnesAvecCollaborateurs(APIView):
+    def get(self, request, *args, **kwargs):
+        # Récupérer l'utilisateur à partir des paramètres de requête
+        user_id = self.request.query_params.get('user', None)
+
+        # Vérifier si l'ID de l'utilisateur est fourni dans les paramètres de requête
+        if user_id is None:
+            return Response({"error": "Paramètre 'user' manquant dans la requête."}, status=400)
+
+        # Récupérer la liste des campagnes pour cet utilisateur
+        campagnes = Campagne.objects.filter(
+            collaborateurs__user=user_id).distinct()
+        # campagnes_sans_collaborateurs = Campagne.objects.filter(
+        #     collaborateurs__user=user_id).exclude(collaborateurs__isnull=False).distinct()
+
+        # campagnes_sans_collaborateur = Campagne.objects.filter(
+        #     user=user_id, collaborateurs__isnull=True)
+
+        # Initialiser une liste pour stocker les données de chaque campagne
+        data_campagnes = []
+
+        # Parcourir les campagnes
+        for campagne in campagnes:
+            # Récupérer les collaborateurs pour chaque campagne
+            collaborateurs = Collaborateur.objects.filter(campagne=campagne)
+
+            for col in collaborateurs:
+
+                # user = User.objects.get(id=col.user)
+                # serializer = UserSerializer(user)
+                # serialized_user = serializer.data
+                col.user_full_name = col.user.get_full_name()
+
+            # Sérialiser les collaborateurs avec le sérialiseur CollaborateurSerializer
+            serializer = CollaborateurSerializer(collaborateurs, many=True)
+            serialized_collaborateurs = serializer.data
+
+            # Ajouter l'ID de la campagne au dictionnaire
+            data_campagne = {
+                'id_campagne': campagne.id,
+                'nom_campagne': campagne.nom,
+                'collaborateurs': serialized_collaborateurs,
+                'total': len(serialized_collaborateurs)
+            }
+
+            # Ajouter le dictionnaire de la campagne à la liste
+            data_campagnes.append(data_campagne)
+
+        return Response(data_campagnes)
+
+
+class ListeCampagnesAvecCollaborateurs1(APIView):
+
+    def get(self, request, *args, **kwargs):
+        # Récupérer les paramètres de requête
+        campagne_id = self.request.query_params.get('campagne_id', None)
+
+        # Vérifier si les paramètres nécessaires sont fournis dans les paramètres de requête
+        if campagne_id is None:
+            return Response({"error": "Paramètre 'campagne_id' manquant dans la requête."}, status=400)
+
+        # Récupérer le collaborateur correspondant aux paramètres ou renvoyer une 404
+        collaborateurs = Collaborateur.objects.filter(campagne=campagne_id)
+
+        for col in collaborateurs:
+
+            # user = User.objects.get(id=col.user)
+            # serializer = UserSerializer(user)
+            # serialized_user = serializer.data
+            col.user_full_name = col.user.get_full_name()
+
+        # Sérialiser le collaborateur
+        serializer = CollaborateurSerializer(collaborateurs, many=True)
+        serialized_collaborateurs = serializer.data
+
+        return Response(serialized_collaborateurs)

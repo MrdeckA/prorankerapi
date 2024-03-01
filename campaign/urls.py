@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from campaign.views import CampagneListeView, CampagneDetailView, CandidatListeView, CandidatDetailView, CollaborateurListeView, CollaborateurDetailView, make_ranking, charger_contenu_pdfs, posting
+from campaign.views import CampagneListeView, CampagneDetailView, CandidatListeView, CandidatDetailView, CollaborateurListeView, CollaborateurDetailView, make_ranking, charger_contenu_pdfs, posting, ListeCampagnesAvecCollaborateurs, ListeCampagnesAvecCollaborateurs1
 
 
 urlpatterns = [
@@ -19,4 +19,12 @@ urlpatterns = [
     path('posting/', posting, name='posting'),
     path('charger_contenu_pdfs/', charger_contenu_pdfs,
          name='charger_contenu_pdfs'),
+    path('liste-campagnes-collaborateurs/', ListeCampagnesAvecCollaborateurs.as_view(),
+         name='liste-campagnes-collaborateurs'),
+    path('collaborators/campagne', ListeCampagnesAvecCollaborateurs1.as_view(),
+         name='get-collaborators-for-campaign'),
+
+
+
+
 ]

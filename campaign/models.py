@@ -51,6 +51,8 @@ class Collaborateur(models.Model):
         Campagne, on_delete=models.CASCADE, related_name='collaborateurs')
     # Vous pouvez ajuster la longueur en fonction de vos besoins
     role = models.CharField(max_length=255, default="")
+    user_full_name = models.CharField(max_length=255, default="")
+    statut_invitation = models.CharField(max_length=255, default="En attente")
 
     def __str__(self):
         return f'Collaborateur: {self.user.username} - Campagne: {self.campagne.nom}'
