@@ -49,6 +49,8 @@ class Collaborateur(models.Model):
         User, on_delete=models.CASCADE, related_name='collaborateurs')
     campagne = models.ForeignKey(
         Campagne, on_delete=models.CASCADE, related_name='collaborateurs')
+    # Vous pouvez ajuster la longueur en fonction de vos besoins
+    role = models.CharField(max_length=255, default="")
 
     def __str__(self):
         return f'Collaborateur: {self.user.username} - Campagne: {self.campagne.nom}'
