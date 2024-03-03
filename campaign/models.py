@@ -16,9 +16,8 @@ class Campagne(models.Model):
     minimum_number_of_experiences = models.IntegerField(default=0)
     minimum_degree = models.CharField(max_length=255, default="")
     languages = models.TextField(blank=True, null=True)
+    certifications = models.TextField(blank=True, null=True)
     skills = models.TextField(blank=True, null=True)
-    has_awards = models.BooleanField(default=False)
-    has_certifications = models.BooleanField(default=False)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='campagnes', default=None, blank=False)
     files = models.JSONField(blank=False, default=None)
@@ -44,15 +43,13 @@ class Candidat(models.Model):
         return f'{self.prenom} {self.nom} - Campagne: {self.campagne.nom}'
 
 
-class Collaborateur(models.Model):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='collaborateurs')
-    campagne = models.ForeignKey(
-        Campagne, on_delete=models.CASCADE, related_name='collaborateurs')
+class Collaboration(models.Model):
+    inviteur = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='collaborations_envoyees')
+    invite = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='collaborations_recues')
     # Vous pouvez ajuster la longueur en fonction de vos besoins
     role = models.CharField(max_length=255, default="")
-    user_full_name = models.CharField(max_length=255, default="")
-    statut_invitation = models.CharField(max_length=255, default="En attente")
 
     def __str__(self):
-        return f'Collaborateur: {self.user.username} - Campagne: {self.campagne.nom}'
+        return f'Collaboration - Inviteur: {self.inviteur.username} - Invite: {self.invite.username} - Rôle: {self.role}'

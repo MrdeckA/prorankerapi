@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Campagne, Candidat, Collaborateur
+from .models import Campagne, Candidat, Collaboration
 
 
 class CampagneAdmin(admin.ModelAdmin):
@@ -11,8 +11,8 @@ class CandidatAdmin(admin.ModelAdmin):
                     'email', 'telephone', 'cv_data_url', 'cv_original_name')
 
 
-class CollaborateurAdmin(admin.ModelAdmin):
-    list_display = ('user', 'campagne')
+class CollaborationAdmin(admin.ModelAdmin):
+    list_display = ('inviteur', 'invite')
 
 
 class CompetenceAdmin(admin.ModelAdmin):
@@ -21,4 +21,4 @@ class CompetenceAdmin(admin.ModelAdmin):
 
 admin.site.register(Campagne, CampagneAdmin)
 admin.site.register(Candidat, CandidatAdmin)
-admin.site.register(Collaborateur, CollaborateurAdmin)
+admin.site.register(Collaboration, CollaborationAdmin)

@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 import django_filters
-from .models import Campagne, Candidat, Collaborateur
+from .models import Campagne, Candidat, Collaboration
 from django.db import models
 
 
@@ -24,10 +24,10 @@ class CandidatFilter(django_filters.FilterSet):
         fields = '__all__'
 
 
-class CollaborateurFilter(django_filters.FilterSet):
+class CollaborationFilter(django_filters.FilterSet):
     user__id = filters.CharFilter(lookup_expr='icontains')
     campagne__id = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = Collaborateur
+        model = Collaboration
         fields = '__all__'

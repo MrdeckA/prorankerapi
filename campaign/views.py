@@ -5,8 +5,8 @@ from .apps import CampaignConfig
 import sys
 import fitz
 from rest_framework import generics
-from .models import Campagne, Candidat, Collaborateur
-from .serializers import CampagneSerializer, CandidatSerializer, CollaborateurSerializer, UserSerializer
+from .models import Campagne, Candidat, Collaboration
+from .serializers import CampagneSerializer, CandidatSerializer, CollaborationSerializer, UserSerializer
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -25,7 +25,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 
 from django_filters import rest_framework as filters
-from .filters import CollaborateurFilter, CampagneFilter, CandidatFilter
+from .filters import CollaborationFilter, CampagneFilter, CandidatFilter
 from django.shortcuts import get_object_or_404
 import re
 from unidecode import unidecode
@@ -35,6 +35,8 @@ from rest_framework.parsers import FileUploadParser, FormParser, MultiPartParser
 from rest_framework.decorators import api_view, parser_classes
 from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
+from langchain_openai import ChatOpenAI
+from langchain.chains import create_extraction_chain
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -115,16 +117,16 @@ class CandidatDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CandidatSerializer
 
 
-class CollaborateurListeView(generics.ListCreateAPIView):
-    queryset = Collaborateur.objects.all()
-    serializer_class = CollaborateurSerializer
+class CollaborationListeView(generics.ListCreateAPIView):
+    queryset = Collaboration.objects.all()
+    serializer_class = CollaborationSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = CollaborateurFilter
+    filterset_class = CollaborationFilter
 
 
-class CollaborateurDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Collaborateur.objects.all()
-    serializer_class = CollaborateurSerializer
+class CollaborationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Collaboration.objects.all()
+    serializer_class = CollaborationSerializer
 
 
 def make_ranking(request):
@@ -156,155 +158,69 @@ def make_ranking(request):
 
 
 def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
+    api_key = "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"
+
+    # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
+    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
+
+    # Création de la chaîne d'extraction
+    chain = create_extraction_chain(schema, llm)
+
+    schema = {
+        "properties": {
+            "nom": {"type": "string"},
+            "email": {"type": "string"},
+            "experiences": {"type": "array", "items": {"type": "string"}},
+            "diplomes": {"type": "array", "items": {"type": "string"}},
+            "competences": {"type": "array", "items": {"type": "string"}},
+            "outils": {"type": "array", "items": {"type": "string"}},
+            "langues": {"type": "array", "items": {"type": "string"}},
+            "contact": {"type": "array", "items": {"type": "string"}},
+            "telephone": {"type": "string"},
+            "certifications": {"type": "array", "items": {"type": "string"}},
+            "nombre d'années d'experiences": {"type": "integer"},
+        },
+        "required": ["nom", "email"]
+    }
+
+    # OpenAI
+
     campagne = get_object_or_404(Campagne, id=9)
     fname = fname
     doc = fitz.open(fname)
     text = "".join(page.get_text() for page in doc)
     doc.close()
 
-    prediction_mon_model = CampaignConfig.my_nlp(text)
-    prediction_model_spacy = CampaignConfig.spacy_nlp(text)
-    description_prediction_mon_model = CampaignConfig.my_nlp(
-        campagne.description_poste)
-    description_prediction_model_spacy = CampaignConfig.spacy_nlp(
-        campagne.description_poste)
-    intitule_poste_prediction_mon_model = CampaignConfig.my_nlp(
-        campagne.intitule_poste)
-    intitule_poste_prediction_model_spacy = CampaignConfig.spacy_nlp(
-        campagne.intitule_poste)
+    result = chain.invoke(doc)
 
-    if fname == './uploads/cv21.pdf':
-        for txt in prediction_model_spacy.ents:
-            print(f'{txt.text} {txt.label_}')
+    # Exécution de la chaîne sur le texte du CV
 
-    predictions = []
-    descriptions = []
-    intitules = []
-    nom_complet = ""
-    email = ""
-    languages = []
-    awards = []
-    certifications = []
-    experiences = []
-    degree = []
+    result = result['text']
+    # Résultat
+    nom = result[0].get("nom", "")
+    email = result[0].get('email', "")
+    experiences = result[0].get('experiences', [])
+    diplomes = result[0].get("diplomes", [])
+    competences = result[0].get("competences", [])
+    outils = result[0].get("outils", [])
+    langues = result[0].get("langues", [])
+    telephone = result[0].get("telephone", "")
+    certifications = result[0].get("certifications", [])
 
-    for ent in prediction_mon_model.ents:
-        if ent.label_ in ('SKILLS', 'DESIGNATION', 'WORKED AS', 'COMPANIES WORKED AT', 'DESIGNATION',
-                          'AWARDS',
-                          'CERTIFICATION'):
-            predictions.append(ent.text)
-        elif ent.label_ == 'NAME':
-            nom_complet = ent.text
-        elif ent.label_ == 'EMAIL ADDRESS':
-            email = ent.text
+    poste = f"{campagne.description_poste} {campagne.intitule_poste}"
+    result_poste = chain.invoke(poste)
 
-        elif ent.label_ == 'LANGUAGE':
-            languages.append(ent.text)
-        elif ent.label_ == 'YEARS OF EXPERIENCE':
-            experiences.append(ent.text)
-        elif ent.label_ == 'DEGREE':
-            degree.append(ent.text)
-        elif ent.label_ == 'AWARDS':
-            awards.append(ent.text)
-        elif ent.label_ == 'CERTIFICATION':
-            certifications.append(ent.text)
+    # Exécution de la chaîne sur le texte du CV
 
-    for ent in prediction_model_spacy.ents:
-        if ent.label_ == 'MISC':
-            predictions.append(ent.text)
-        elif ent.label_ == 'ORG':
-            predictions.append(ent.text)
-
-    for ent in description_prediction_mon_model.ents:
-        if ent.label_ == 'SKILLS':
-            descriptions.append(ent.text)
-
-    for ent in description_prediction_model_spacy.ents:
-        if ent.label_ == 'MISC':
-            descriptions.append(ent.text)
-        elif ent.label_ == 'ORG':
-            descriptions.append(ent.text)
-
-    for ent in intitule_poste_prediction_mon_model.ents:
-        if ent.label_ == 'SKILLS':
-            intitules.append(ent.text)
-
-    for ent in intitule_poste_prediction_model_spacy.ents:
-        if ent.label_ == 'MISC':
-            intitules.append(ent.text)
-        elif ent.label_ == 'ORG':
-            intitules.append(ent.text)
-
-    description_intitule = descriptions + intitules
-
-    description_intitule = [normaliser_chaine(
-        chaine) for chaine in description_intitule]
-    predictions = [normaliser_chaine(chaine) for chaine in predictions]
-
-    # Initialiser la variable de score
-    score = sum(any(chaine1 in chaine2 for chaine2 in predictions)
-                for chaine1 in description_intitule)
-
-    # language
-    languages_count = len(languages)
-    campagne_languages = [normaliser_chaine(
-        chaine) for chaine in campagne.languages.split(',')]
-    languages = [normaliser_chaine(chaine) for chaine in languages]
-    score += sum(any(chaine1 in chaine2 for chaine2 in languages)
-                 for chaine1 in campagne_languages)
-
-    # skills
-    campagne_skills = [normaliser_chaine(chaine)
-                       for chaine in campagne.skills.split(',')]
-    score += sum(any(chaine1 in chaine2 for chaine2 in predictions)
-                 for chaine1 in campagne_skills)
-
-    # autres critères
-    experiences_count = len(experiences)
-    awards_count = len(awards)
-    certifications_count = len(certifications)
-
-    score += awards_count > 0
-    score += certifications_count > 0
-    score += experiences_count >= campagne.minimum_number_of_experiences
-    score += languages_count >= campagne.minimum_number_of_languages
-
-    diplomes = {
-        "Diplôme d'études primaires (DEP)": ["DEP", "Diplôme d'études primaires"],
-        "Brevet d'études du premier cycle (BEPC)": ["BEPC", "Brevet d'études du premier cycle"],
-        "Baccalauréat (BAC)": ["BAC", "Baccalauréat"],
-        "Licence (L1, L2, L3)": ["Licence", "L1", "L2", "L3"],
-        "Master (M1, M2)": ["Master", "M1", "M2"],
-        "Doctorat (Ph.D.)": ["Doctorat", "Ph.D."],
-        "Certificat d'aptitude professionnelle (CAP)": ["CAP", "Certificat d'aptitude professionnelle"],
-        "Brevet de technicien supérieur (BTS)": ["BTS", "Brevet de technicien supérieur"],
-        "Diplôme universitaire de technologie (DUT)": ["DUT", "Diplôme universitaire de technologie"],
-        "Certificat universitaire (CU)": ["CU", "Certificat universitaire"],
-        "Mastère spécialisé (MS)": ["MS", "Mastère spécialisé"],
-        "Agrégation": ["Agrégation"]
-    }
-    degree = [normaliser_chaine(chaine) for chaine in degree]
-    campagne_diplome = [normaliser_chaine(
-        chaine) for chaine in diplomes[campagne.minimum_degree]]
-    score += any(chaine1 in chaine2 for chaine1 in campagne_diplome for chaine2 in degree)
-
-    if not is_valid_email(email):
-        email = recuperer_premiere_email(text)
-        print(fname, email)
-    data = {
-        "score": score,
-        "description_intitule": description_intitule,
-        "intitules": intitules,
-        "predictions": predictions,
-        "degree": degree,
-        "experiences": experiences,
-        "certifications": certifications,
-        "awards": awards,
-        "languages": languages,
-        "email": email,
-        "nom_complet": nom_complet,
-        "texte_pdf": text
-    }
+    result_poste = result_poste['text']
+    # Résultat
+    nom_poste = result_poste[0].get("nom", "")
+    experiences_poste = result_poste[0].get('experiences', [])
+    diplomes_poste = result_poste[0].get("diplomes", [])
+    competences_poste = result_poste[0].get("competences", [])
+    outils_poste = result_poste[0].get("outils", [])
+    langues_poste = result_poste[0].get("langues", [])
+    certifications_poste = result_poste[0].get("certifications", [])
 
     return {
         f"{fname}": {
@@ -405,6 +321,7 @@ def posting(request):
     # return JsonResponse({"contenu_cvs": "contenu_cvs"})
 
 
+"""
 class ListeCampagnesAvecCollaborateurs(APIView):
     def get(self, request, *args, **kwargs):
         # Récupérer l'utilisateur à partir des paramètres de requête
@@ -455,29 +372,29 @@ class ListeCampagnesAvecCollaborateurs(APIView):
 
         return Response(data_campagnes)
 
+"""
+# class ListeCampagnesAvecCollaborateurs1(APIView):
 
-class ListeCampagnesAvecCollaborateurs1(APIView):
+#     def get(self, request, *args, **kwargs):
+#         # Récupérer les paramètres de requête
+#         campagne_id = self.request.query_params.get('campagne_id', None)
 
-    def get(self, request, *args, **kwargs):
-        # Récupérer les paramètres de requête
-        campagne_id = self.request.query_params.get('campagne_id', None)
+#         # Vérifier si les paramètres nécessaires sont fournis dans les paramètres de requête
+#         if campagne_id is None:
+#             return Response({"error": "Paramètre 'campagne_id' manquant dans la requête."}, status=400)
 
-        # Vérifier si les paramètres nécessaires sont fournis dans les paramètres de requête
-        if campagne_id is None:
-            return Response({"error": "Paramètre 'campagne_id' manquant dans la requête."}, status=400)
+#         # Récupérer le collaborateur correspondant aux paramètres ou renvoyer une 404
+#         collaborateurs = Collaborateur.objects.filter(campagne=campagne_id)
 
-        # Récupérer le collaborateur correspondant aux paramètres ou renvoyer une 404
-        collaborateurs = Collaborateur.objects.filter(campagne=campagne_id)
+#         for col in collaborateurs:
 
-        for col in collaborateurs:
+#             # user = User.objects.get(id=col.user)
+#             # serializer = UserSerializer(user)
+#             # serialized_user = serializer.data
+#             col.user_full_name = col.user.get_full_name()
 
-            # user = User.objects.get(id=col.user)
-            # serializer = UserSerializer(user)
-            # serialized_user = serializer.data
-            col.user_full_name = col.user.get_full_name()
+#         # Sérialiser le collaborateur
+#         serializer = CollaborateurSerializer(collaborateurs, many=True)
+#         serialized_collaborateurs = serializer.data
 
-        # Sérialiser le collaborateur
-        serializer = CollaborateurSerializer(collaborateurs, many=True)
-        serialized_collaborateurs = serializer.data
-
-        return Response(serialized_collaborateurs)
+#         return Response(serialized_collaborateurs)

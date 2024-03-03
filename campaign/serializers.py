@@ -1,7 +1,7 @@
 # serializers.py
 
 from rest_framework import serializers
-from .models import Campagne, Candidat, Collaborateur
+from .models import Campagne, Candidat, Collaboration
 from django.contrib.auth.models import User
 
 
@@ -23,7 +23,7 @@ class CandidatSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CollaborateurSerializer(serializers.ModelSerializer):
+class CollaborationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Collaborateur
+        model = Collaboration
         fields = '__all__'
