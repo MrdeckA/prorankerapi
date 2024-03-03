@@ -122,13 +122,14 @@ schema = {
         "langues": {"type": "array", "items": {"type": "string"}},
         "contact": {"type": "array", "items": {"type": "string"}},
         "telephone": {"type": "string"},
+        "certifications": {"type": "array", "items": {"type": "string"}},
+        "nombre d'années d'experiences": {"type": "integer"},
     },
     "required": ["nom", "email"]
 }
 
 
-api_key = "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"
-
+api_key = "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"
 
 # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
@@ -137,17 +138,19 @@ llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
 chain = create_extraction_chain(schema, llm)
 
 # Exécution de la chaîne sur le texte du CV
-result = chain.run(cv_text)
+result = chain.invoke(cv_text)
 
+result = result['text']
 # Résultat
-nom = result[0]["nom"]
-email = result[0]["email"]
-experiences = result[0]["experiences"]
-diplomes = result[0]["diplomes"]
-competences = result[0]["competences"]
+nom = result[0].get("nom", "")
+email = result[0].get('email', "")
+experiences = result[0].get('experiences', [])
+diplomes = result[0].get("diplomes", [])
+competences = result[0].get("competences", [])
 outils = result[0].get("outils", [])
-langues = result[0]["langues"]
-telephone = result[0]["telephone"]
+langues = result[0].get("langues", [])
+telephone = result[0].get("telephone", "")
+certifications = result[0].get("certifications", [])
 # contact = result[0]["contacts"]
 
 print(f"Nom : {nom}")
@@ -157,5 +160,5 @@ print(f"Diplômes : {diplomes}")
 print(f"Compétences : {competences}")
 print(f"Outils : {outils}")
 print(f"Langues : {langues}")
-print(f"Telephone : {langues}")
-# print(f"Contacts : {contact}")
+print(f"Telephone : {telephone}")
+print(f"certifications : {certifications}")
