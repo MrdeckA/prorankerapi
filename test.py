@@ -129,7 +129,7 @@ schema = {
 }
 
 
-api_key = "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"
+api_key = "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"
 
 # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
@@ -138,9 +138,9 @@ llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
 chain = create_extraction_chain(schema, llm)
 
 # Exécution de la chaîne sur le texte du CV
-result = chain.invoke(cv_text)
+result = chain.run(cv_text)
 
-result = result['text']
+# result = result['text']
 # Résultat
 nom = result[0].get("nom", "")
 email = result[0].get('email', "")

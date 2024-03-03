@@ -153,7 +153,7 @@ def make_ranking(request):
     poste = f"{campagne.description_poste} {campagne.intitule_poste}"
     result_poste = chain.invoke(poste)
 
-    # scores = {}
+    scores = {}
     # results = {}
     # for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
     #     nom_fichier = f'./uploads/cv{i}.pdf'
@@ -169,19 +169,17 @@ def make_ranking(request):
     # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
     # print(result)
 
-    # for i in range(1, 5):
-    #     nom_fichier = f'./uploads/cv{i}.pdf'
-    #     scores[nom_fichier] = {
-    #         "email": result[nom_fichier]["email"],
-    #         "nom_complet": result[nom_fichier]["nom_complet"],
-    #         "score": result['score']
-    #     }
+    for i in range(3, 24):
+        nom_fichier = f'./uploads/cv{i}.pdf'
+        scores[nom_fichier] = calculating_score_for_a_andidate(
+            chain, campagne,  result_poste, request, nom_fichier)
+        print(f"done for {nom_fichier}")
 
-    rs = calculating_score_for_a_andidate(
-        chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
+    # rs = calculating_score_for_a_andidate(
+    #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
 
     # return JsonResponse({"response": scores, "other": results})
-    return JsonResponse({"response": rs})
+    return JsonResponse({"response": scores})
 
 
 def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
@@ -190,8 +188,10 @@ def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, 
     doc = fitz.open(fname)
     text = "".join(page.get_text() for page in doc)
     doc.close()
+    print("before")
 
     result = chain.invoke(text)
+    print("after")
 
     # Exécution de la chaîne sur le texte du CV
 
@@ -344,22 +344,15 @@ def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, 
 
     data = {
         "score": score,
-        "prediction": result,
+        # "prediction": result,
         "email": email,
         "nom_complet": nom,
         "telephone": telephone,
-        "texte_pdf": text
+        "texte_pdf": text,
+        "fichier": fname
     }
 
-    return {
-        f"{fname}": {
-            "email": data['email'],
-            "text": text,
-            "nom_complet": nom,
-            "nom_complet1": result,
-            "nom_complet3": result_poste,
-        }, "score": data["score"]
-    }
+    return data
 
 
 def normaliser_chaine(chaine):
