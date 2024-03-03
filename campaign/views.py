@@ -130,6 +130,29 @@ class CollaborationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def make_ranking(request):
+    llm = CampaignConfig.llm
+
+    schema = {
+        "properties": {
+            "nom": {"type": "string"},
+            "email": {"type": "string"},
+            "telephone": {"type": "string"},
+            "experiences": {"type": "array", "items": {"type": "string"}},
+            "diplomes": {"type": "array", "items": {"type": "string"}},
+            "competences": {"type": "array", "items": {"type": "string"}},
+            "outils": {"type": "array", "items": {"type": "string"}},
+            "langues": {"type": "array", "items": {"type": "string"}},
+            "certifications": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["nom", "email"]
+    }
+
+    chain = create_extraction_chain(schema, llm)
+
+    campagne = get_object_or_404(Campagne, id=16)
+    poste = f"{campagne.description_poste} {campagne.intitule_poste}"
+    result_poste = chain.invoke(poste)
+
     # scores = {}
     # results = {}
     # for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
@@ -154,40 +177,15 @@ def make_ranking(request):
     #         "score": result['score']
     #     }
 
-    rs = calculating_score_for_a_andidate(request, "./uploads/cv23.pdf")
+    rs = calculating_score_for_a_andidate(
+        chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
 
     # return JsonResponse({"response": scores, "other": results})
     return JsonResponse({"response": rs})
 
 
-def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
-    api_key = "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"
+def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
 
-    # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
-
-    # Création de la chaîne d'extraction
-
-    schema = {
-        "properties": {
-            "nom": {"type": "string"},
-            "email": {"type": "string"},
-            "telephone": {"type": "string"},
-            "experiences": {"type": "array", "items": {"type": "string"}},
-            "diplomes": {"type": "array", "items": {"type": "string"}},
-            "competences": {"type": "array", "items": {"type": "string"}},
-            "outils": {"type": "array", "items": {"type": "string"}},
-            "langues": {"type": "array", "items": {"type": "string"}},
-            "certifications": {"type": "array", "items": {"type": "string"}},
-        },
-        "required": ["nom", "email"]
-    }
-
-    chain = create_extraction_chain(schema, llm)
-
-    # OpenAI
-
-    campagne = get_object_or_404(Campagne, id=16)
     fname = fname
     doc = fitz.open(fname)
     text = "".join(page.get_text() for page in doc)
@@ -208,9 +206,6 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     outils = result[0].get("outils", [])
     langues = result[0].get("langues", [])
     certifications = result[0].get("certifications", [])
-
-    poste = f"{campagne.description_poste} {campagne.intitule_poste}"
-    result_poste = chain.invoke(poste)
 
     # Exécution de la chaîne sur le texte du CV
 
