@@ -130,19 +130,19 @@ class CollaborationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def make_ranking(request):
-    scores = {}
-    results = {}
-    for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
-        nom_fichier = f'./uploads/cv{i}.pdf'
-        result = calculating_score_for_a_andidate(
-            fname=nom_fichier)
-        # email: data['email'], score: data["score"], nom_complet: data['nom_complet'],
+    # scores = {}
+    # results = {}
+    # for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
+    #     nom_fichier = f'./uploads/cv{i}.pdf'
+    #     result = calculating_score_for_a_andidate(
+    #         fname=nom_fichier)
+    #     # email: data['email'], score: data["score"], nom_complet: data['nom_complet'],
 
-        scores[nom_fichier] = result['score']
-        results[nom_fichier] = result[f'{nom_fichier}']
-        print(f"Done for {nom_fichier}")
+    #     scores[nom_fichier] = result['score']
+    #     results[nom_fichier] = result[f'{nom_fichier}']
+    #     print(f"Done for {nom_fichier}")
 
-    valeurs_triees = scores
+    # valeurs_triees = scores
     # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
     # print(result)
 
@@ -154,7 +154,10 @@ def make_ranking(request):
     #         "score": result['score']
     #     }
 
-    return JsonResponse({"response": scores, "other": results})
+    rs = calculating_score_for_a_andidate(request, "./uploads/cv23")
+
+    # return JsonResponse({"response": scores, "other": results})
+    return JsonResponse({"response": rs})
 
 
 def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
@@ -199,12 +202,12 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     # Résultat
     nom = result[0].get("nom", "")
     email = result[0].get('email', "")
+    telephone = result[0].get("telephone", "")
     experiences = result[0].get('experiences', [])
     diplomes = result[0].get("diplomes", [])
     competences = result[0].get("competences", [])
     outils = result[0].get("outils", [])
     langues = result[0].get("langues", [])
-    telephone = result[0].get("telephone", "")
     certifications = result[0].get("certifications", [])
 
     poste = f"{campagne.description_poste} {campagne.intitule_poste}"
@@ -213,7 +216,7 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     # Exécution de la chaîne sur le texte du CV
 
     result_poste = result_poste['text']
-    # Résultat
+    # Résultat 1
     nom_poste = result_poste[0].get("nom", "")
     experiences_poste = result_poste[0].get('experiences', [])
     diplomes_poste = result_poste[0].get("diplomes", [])
@@ -221,6 +224,70 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     outils_poste = result_poste[0].get("outils", [])
     langues_poste = result_poste[0].get("langues", [])
     certifications_poste = result_poste[0].get("certifications", [])
+
+    # # cv
+    # competences = [normaliser_chaine(chaine) for chaine in competences]
+    # experiences = [normaliser_chaine(chaine) for chaine in experiences]
+    # certifications = [normaliser_chaine(chaine) for chaine in certifications]
+    # langues = [normaliser_chaine(chaine) for chaine in langues]
+    # outils = [normaliser_chaine(chaine) for chaine in outils]
+    # diplomes = [normaliser_chaine(chaine) for chaine in diplomes]
+
+    # # extrait de la description du poste
+    # experiences_poste = [normaliser_chaine(
+    #     chaine) for chaine in experiences_poste]
+    # diplomes_poste = [normaliser_chaine(chaine) for chaine in diplomes_poste]
+    # competences_poste = [normaliser_chaine(
+    #     chaine) for chaine in competences_poste]
+    # outils_poste = [normaliser_chaine(chaine) for chaine in outils_poste]
+    # langues_poste = [normaliser_chaine(chaine) for chaine in langues_poste]
+    # certifications_poste = [normaliser_chaine(
+    #     chaine) for chaine in certifications_poste]
+
+    # # campagne
+    # campagne_minimum_degree = normaliser_chaine(campagne.minimum_degree)
+    # campagne_certifications = [normaliser_chaine(
+    #     chaine) for chaine in campagne.certifications]
+    # campagne_languages = [normaliser_chaine(
+    #     chaine) for chaine in campagne.languages]
+    # campagne_skills = [normaliser_chaine(chaine) for chaine in campagne.skills]
+
+    # # scoring
+    # score = 0
+    # score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
+    #              for chaine1 in campagne_certifications)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in competences)
+    #              for chaine1 in campagne_skills)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in langues)
+    #              for chaine1 in campagne_languages)
+
+    # score += int(any(campagne_minimum_degree in chaine for chaine in diplomes))
+
+    # score += len(langues) >= campagne.minimum_number_of_languages
+    # score += len(experiences) >= campagne.minimum_number_of_experiences
+
+    # # descrition + intitule
+    # score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
+    #              for chaine1 in experiences)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
+    #              for chaine1 in diplomes)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
+    #              for chaine1 in outils)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in langues_poste)
+    #              for chaine1 in langues)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
+    #              for chaine1 in competences)
+    # score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
+    #              for chaine1 in certifications)
+
+    data = {
+        "score": score,
+        "prediction": result,
+        "email": email,
+        "nom_complet": nom,
+        "telephone": telephone,
+        "texte_pdf": text
+    }
 
     return {
         f"{fname}": {
