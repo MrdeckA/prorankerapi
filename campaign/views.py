@@ -50,7 +50,7 @@ class CampagneListeView(generics.ListCreateAPIView):
             # print(request.FILES)
             res = json.loads(request.data.get('model'))
 
-            saved_files = []
+            saved_files = json.dumps([])
 
             for key, fichier in request.FILES.items():
                 # Générer un nouveau nom pour le fichier (saving name)
@@ -154,47 +154,46 @@ def make_ranking(request):
     #         "score": result['score']
     #     }
 
-    rs = calculating_score_for_a_andidate(request, "./uploads/cv23")
+    rs = calculating_score_for_a_andidate(request, "./uploads/cv23.pdf")
 
     # return JsonResponse({"response": scores, "other": results})
     return JsonResponse({"response": rs})
 
 
 def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
-    api_key = "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"
+    api_key = "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"
 
     # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
 
     # Création de la chaîne d'extraction
-    chain = create_extraction_chain(schema, llm)
 
     schema = {
         "properties": {
             "nom": {"type": "string"},
             "email": {"type": "string"},
+            "telephone": {"type": "string"},
             "experiences": {"type": "array", "items": {"type": "string"}},
             "diplomes": {"type": "array", "items": {"type": "string"}},
             "competences": {"type": "array", "items": {"type": "string"}},
             "outils": {"type": "array", "items": {"type": "string"}},
             "langues": {"type": "array", "items": {"type": "string"}},
-            "contact": {"type": "array", "items": {"type": "string"}},
-            "telephone": {"type": "string"},
             "certifications": {"type": "array", "items": {"type": "string"}},
-            "nombre d'années d'experiences": {"type": "integer"},
         },
         "required": ["nom", "email"]
     }
 
+    chain = create_extraction_chain(schema, llm)
+
     # OpenAI
 
-    campagne = get_object_or_404(Campagne, id=9)
+    campagne = get_object_or_404(Campagne, id=16)
     fname = fname
     doc = fitz.open(fname)
     text = "".join(page.get_text() for page in doc)
     doc.close()
 
-    result = chain.invoke(doc)
+    result = chain.invoke(text)
 
     # Exécution de la chaîne sur le texte du CV
 
@@ -226,59 +225,127 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     certifications_poste = result_poste[0].get("certifications", [])
 
     # # cv
-    # competences = [normaliser_chaine(chaine) for chaine in competences]
-    # experiences = [normaliser_chaine(chaine) for chaine in experiences]
-    # certifications = [normaliser_chaine(chaine) for chaine in certifications]
-    # langues = [normaliser_chaine(chaine) for chaine in langues]
-    # outils = [normaliser_chaine(chaine) for chaine in outils]
-    # diplomes = [normaliser_chaine(chaine) for chaine in diplomes]
+    competences = [normaliser_chaine(chaine) for chaine in competences]
+    experiences = [normaliser_chaine(chaine) for chaine in experiences]
+    certifications = [normaliser_chaine(chaine) for chaine in certifications]
+    langues = [normaliser_chaine(chaine) for chaine in langues]
+    outils = [normaliser_chaine(chaine) for chaine in outils]
+    diplomes = [normaliser_chaine(chaine) for chaine in diplomes]
 
     # # extrait de la description du poste
-    # experiences_poste = [normaliser_chaine(
-    #     chaine) for chaine in experiences_poste]
-    # diplomes_poste = [normaliser_chaine(chaine) for chaine in diplomes_poste]
-    # competences_poste = [normaliser_chaine(
-    #     chaine) for chaine in competences_poste]
-    # outils_poste = [normaliser_chaine(chaine) for chaine in outils_poste]
-    # langues_poste = [normaliser_chaine(chaine) for chaine in langues_poste]
-    # certifications_poste = [normaliser_chaine(
-    #     chaine) for chaine in certifications_poste]
+    experiences_poste = [normaliser_chaine(
+        chaine) for chaine in experiences_poste]
+    diplomes_poste = [normaliser_chaine(chaine) for chaine in diplomes_poste]
+    competences_poste = [normaliser_chaine(
+        chaine) for chaine in competences_poste]
+    outils_poste = [normaliser_chaine(chaine) for chaine in outils_poste]
+    langues_poste = [normaliser_chaine(chaine) for chaine in langues_poste]
+    certifications_poste = [normaliser_chaine(
+        chaine) for chaine in certifications_poste]
 
     # # campagne
-    # campagne_minimum_degree = normaliser_chaine(campagne.minimum_degree)
-    # campagne_certifications = [normaliser_chaine(
-    #     chaine) for chaine in campagne.certifications]
-    # campagne_languages = [normaliser_chaine(
-    #     chaine) for chaine in campagne.languages]
-    # campagne_skills = [normaliser_chaine(chaine) for chaine in campagne.skills]
+    campagne_minimum_degree = normaliser_chaine(campagne.minimum_degree)
+    campagne_certifications = []
+    if (campagne.certifications):
+        campagne_certifications = [normaliser_chaine(
+            chaine) for chaine in campagne.certifications]
+    campagne_languages = [normaliser_chaine(
+        chaine) for chaine in json.loads(campagne.languages)]
+    campagne_skills = [normaliser_chaine(chaine)
+                       for chaine in json.loads(campagne.skills)]
 
-    # # scoring
-    # score = 0
-    # score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
-    #              for chaine1 in campagne_certifications)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in competences)
-    #              for chaine1 in campagne_skills)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in langues)
-    #              for chaine1 in campagne_languages)
+    # scoring
+    score = 0
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
+                 for chaine1 in campagne_certifications)
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
+                 for chaine1 in campagne_skills)
+###
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences)
+                 for chaine1 in campagne_certifications)
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils)
+                 for chaine1 in campagne_certifications)
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
+                 for chaine1 in campagne_certifications)
 
-    # score += int(any(campagne_minimum_degree in chaine for chaine in diplomes))
+    #
 
-    # score += len(langues) >= campagne.minimum_number_of_languages
-    # score += len(experiences) >= campagne.minimum_number_of_experiences
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences)
+                 for chaine1 in campagne_skills)
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils)
+                 for chaine1 in campagne_skills)
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
+                 for chaine1 in campagne_skills)
 
-    # # descrition + intitule
-    # score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
-    #              for chaine1 in experiences)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
-    #              for chaine1 in diplomes)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
-    #              for chaine1 in outils)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in langues_poste)
-    #              for chaine1 in langues)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
-    #              for chaine1 in competences)
-    # score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
-    #              for chaine1 in certifications)
+###
+    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
+                 for chaine1 in campagne_languages)
+
+    score += int(any(campagne_minimum_degree in chaine for chaine in diplomes))
+
+    score += len(langues) >= campagne.minimum_number_of_languages
+    score += len(experiences) >= campagne.minimum_number_of_experiences
+
+    # descrition + intitule
+
+
+###
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
+                 for chaine1 in certifications)
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
+                 for chaine1 in certifications)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
+                 for chaine1 in certifications)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
+                 for chaine1 in certifications)
+
+    #
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
+                 for chaine1 in experiences)
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
+                 for chaine1 in experiences)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
+                 for chaine1 in experiences)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
+                 for chaine1 in experiences)
+
+    #
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
+                 for chaine1 in outils)
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
+                 for chaine1 in outils)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
+                 for chaine1 in outils)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
+                 for chaine1 in outils)
+
+    #
+    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
+                 for chaine1 in competences)
+    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
+                 for chaine1 in competences)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
+                 for chaine1 in competences)
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
+                 for chaine1 in competences)
+
+
+###
+
+    score += sum(any(chaine1 in chaine2 for chaine2 in langues_poste)
+                 for chaine1 in langues)
+    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
+                 for chaine1 in diplomes)
 
     data = {
         "score": score,
@@ -292,7 +359,10 @@ def calculating_score_for_a_andidate(request={}, fname='./uploads/CV_Mériadeck_
     return {
         f"{fname}": {
             "email": data['email'],
-            "nom_complet": data['nom_complet']
+            "text": text,
+            "nom_complet": nom,
+            "nom_complet1": result,
+            "nom_complet3": result_poste,
         }, "score": data["score"]
     }
 

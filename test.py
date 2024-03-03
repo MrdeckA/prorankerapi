@@ -129,7 +129,7 @@ schema = {
 }
 
 
-api_key = "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"
+api_key = "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"
 
 # # Initialisation du modèle (par exemple, gpt-3.5-turbo)
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
