@@ -8,6 +8,7 @@ from rest_framework import generics
 from .models import Campagne, Candidat, Collaboration
 from .serializers import CampagneSerializer, CandidatSerializer, CollaborationSerializer, UserSerializer
 from rest_framework.response import Response
+
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -50,7 +51,7 @@ class CampagneListeView(generics.ListCreateAPIView):
             # print(request.FILES)
             res = json.loads(request.data.get('model'))
 
-            saved_files = json.dumps([])
+            saved_files = []
 
             for key, fichier in request.FILES.items():
                 # Générer un nouveau nom pour le fichier (saving name)
@@ -78,13 +79,12 @@ class CampagneListeView(generics.ListCreateAPIView):
                     'minimum_number_of_languages', 0),
                 minimum_number_of_experiences=res.get(
                     'minimum_number_of_experiences', 0),
-                minimum_degree=res.get('minimum_degree', ''),
                 languages=json.dumps(res.get('languages', [])),
                 skills=json.dumps(res.get('skills', [])),
-                has_awards=res.get('has_awards', False),
-                has_certifications=res.get('has_certifications', False),
+                degrees=json.dumps(res.get('degrees', [])),
+                certifications=json.dumps(res.get('certifications', [])),
                 user_id=res.get('user', ''),
-                files=saved_files
+                files=json.dumps(saved_files)
             )
             # print(res.get('nom'))
             newCampagne.save()
@@ -130,59 +130,72 @@ class CollaborationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 def make_ranking(request):
-    llm = CampaignConfig.llm
+    try:
+        llm = CampaignConfig.llm
 
-    schema = {
-        "properties": {
-            "nom": {"type": "string"},
-            "email": {"type": "string"},
-            "telephone": {"type": "string"},
-            "experiences": {"type": "array", "items": {"type": "string"}},
-            "diplomes": {"type": "array", "items": {"type": "string"}},
-            "competences": {"type": "array", "items": {"type": "string"}},
-            "outils": {"type": "array", "items": {"type": "string"}},
-            "langues": {"type": "array", "items": {"type": "string"}},
-            "certifications": {"type": "array", "items": {"type": "string"}},
-        },
-        "required": ["nom", "email"]
-    }
+        campagne_id = request.GET.get('campagne')
 
-    chain = create_extraction_chain(schema, llm)
+        if campagne_id is None:
+            return JsonResponse({"error": "Paramètre 'campagne' manquant dans la requête."})
 
-    campagne = get_object_or_404(Campagne, id=16)
-    poste = f"{campagne.description_poste} {campagne.intitule_poste}"
-    result_poste = chain.invoke(poste)
+        schema = {
+            "properties": {
+                "nom": {"type": "string"},
+                "email": {"type": "string"},
+                "telephone": {"type": "string"},
+                "experiences": {"type": "array", "items": {"type": "string"}},
+                "diplomes": {"type": "array", "items": {"type": "string"}},
+                "competences": {"type": "array", "items": {"type": "string"}},
+                "outils": {"type": "array", "items": {"type": "string"}},
+                "langues": {"type": "array", "items": {"type": "string"}},
+                "certifications": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["nom", "email"]
+        }
 
-    scores = {}
-    # results = {}
-    # for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
-    #     nom_fichier = f'./uploads/cv{i}.pdf'
-    #     result = calculating_score_for_a_andidate(
-    #         fname=nom_fichier)
-    #     # email: data['email'], score: data["score"], nom_complet: data['nom_complet'],
+        chain = create_extraction_chain(schema, llm, verbose=True)
 
-    #     scores[nom_fichier] = result['score']
-    #     results[nom_fichier] = result[f'{nom_fichier}']
-    #     print(f"Done for {nom_fichier}")
+        campagne = get_object_or_404(Campagne, id=campagne_id)
+        poste = f"{campagne.description_poste} {campagne.intitule_poste}"
+        # print(json.loads(campagne.files)[0])
+        campagne_files = json.loads(campagne.files)
 
-    # valeurs_triees = scores
-    # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
-    # print(result)
+        result_poste = chain.invoke(poste)
 
-    for i in range(3, 24):
-        nom_fichier = f'./uploads/cv{i}.pdf'
-        scores[nom_fichier] = calculating_score_for_a_andidate(
-            chain, campagne,  result_poste, request, nom_fichier)
-        print(f"done for {nom_fichier}")
+        scores = {}
 
-    # rs = calculating_score_for_a_andidate(
-    #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
+        results = {}
+        # for i in range(3, 20):  # Boucle de cv1.pdf à cv22.pdf
+        #     nom_fichier = f'./uploads/cv{i}.pdf'
+        #     result = calculating_score_for_a_andidate(
+        #         fname=nom_fichier)
+        #     # email: data['email'], score: data["score"], nom_complet: data['nom_complet'],
 
-    # return JsonResponse({"response": scores, "other": results})
-    return JsonResponse({"response": scores})
+        #     scores[nom_fichier] = result['score']
+        #     results[nom_fichier] = result[f'{nom_fichier}']
+        #     print(f"Done for {nom_fichier}")
+
+        # valeurs_triees = scores
+        # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
+        # print(result)
+
+        for campagne_file in campagne_files:
+            nom_fichier = f"./{campagne_file['saving_name']}"
+            scores[nom_fichier] = calculating_score_for_a_andidate(
+                chain, campagne,  result_poste, request, nom_fichier)
+            print(f"done for {nom_fichier}")
+
+        # rs = calculating_score_for_a_andidate(
+        #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
+
+        return JsonResponse({"response": scores, "other": results})
+        # return JsonResponse({"response": CampagneSerializer(campagne).data})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'message': str(e)})
 
 
-def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
+def calculating_score_for_a_andidate(chain, campagne: Campagne, result_poste, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
 
     fname = fname
     doc = fitz.open(fname)
@@ -239,7 +252,9 @@ def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, 
         chaine) for chaine in certifications_poste]
 
     # # campagne
-    campagne_minimum_degree = normaliser_chaine(campagne.minimum_degree)
+    # campagne_minimum_degree = normaliser_chaine(campagne.minimum_degree)
+    campagne_degrees = [normaliser_chaine(
+        chaine) for chaine in json.loads(campagne.degrees)]
     campagne_certifications = []
     if (campagne.certifications):
         campagne_certifications = [normaliser_chaine(
@@ -275,8 +290,8 @@ def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, 
 ###
     score += sum(any(chaine1 in chaine2 for chaine2 in langues)
                  for chaine1 in campagne_languages)
-
-    score += int(any(campagne_minimum_degree in chaine for chaine in diplomes))
+    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes)
+                 for chaine1 in campagne_degrees)
 
     score += len(langues) >= campagne.minimum_number_of_languages
     score += len(experiences) >= campagne.minimum_number_of_experiences
@@ -342,6 +357,9 @@ def calculating_score_for_a_andidate(chain, campagne, result_poste, request={}, 
     score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
                  for chaine1 in diplomes)
 
+    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
+                 for chaine1 in campagne_degrees)
+
     data = {
         "score": score,
         # "prediction": result,
@@ -369,7 +387,7 @@ def normaliser_chaine(chaine):
     # Supprimer les apostrophes et les '/' et les espaces
     # Supprimer les traits d'union ou les points
     chaine = chaine.replace("'", "").replace(
-        "/", "").replace(" ", "").replace("-", "").replace(".", "")
+        "/", "").replace(" ", "").replace("-", "").replace(".", "").replace(",", "")
 
     return chaine
 

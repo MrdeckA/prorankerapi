@@ -14,8 +14,8 @@ class Campagne(models.Model):
     intitule_poste = models.CharField(max_length=255, blank=False, default="")
     minimum_number_of_languages = models.IntegerField(default=0)
     minimum_number_of_experiences = models.IntegerField(default=0)
-    minimum_degree = models.CharField(max_length=255, default="")
     languages = models.TextField(blank=True, null=True)
+    degrees = models.TextField(blank=True, null=True)
     certifications = models.TextField(blank=True, null=True)
     skills = models.TextField(blank=True, null=True)
     user = models.ForeignKey(

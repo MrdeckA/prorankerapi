@@ -12,9 +12,10 @@ class CampaignConfig(AppConfig):
     def load_nlp_model(model_path):
         return spacy.load(model_path)
 
-    api_key = "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"
+    api_key = "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"
 
-    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=api_key)
+    llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",
+                     api_key=api_key, verbose=True)
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "campaign"
