@@ -93,7 +93,7 @@ class CampagneListeView(generics.ListCreateAPIView):
             # print(request.user)
             # Boucle à travers tous les fichiers dans request.FILES
 
-            return Response({'message':  res}, status=status.HTTP_201_CREATED)
+            return Response({'campagne':  CampagneSerializer(newCampagne).data}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(e)
@@ -188,7 +188,7 @@ def make_ranking(request):
         # rs = calculating_score_for_a_andidate(
         #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
 
-        return JsonResponse({"response": scores, "other": results})
+        return JsonResponse({"response": scores})
         # return JsonResponse({"response": CampagneSerializer(campagne).data})
     except Exception as e:
         print(e)
