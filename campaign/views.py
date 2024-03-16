@@ -285,7 +285,7 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
     campagne_certifications = []
     if (campagne.certifications):
         campagne_certifications = [normaliser_chaine(
-            chaine) for chaine in campagne.certifications]
+            chaine) for chaine in json.loads(campagne.certifications)]
     campagne_languages = [normaliser_chaine(
         chaine) for chaine in json.loads(campagne.languages)]
     campagne_skills = [normaliser_chaine(chaine)
@@ -294,40 +294,95 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
     # scoring
     score = 0
     # certifs
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
-                 for chaine1 in campagne_certifications)
+    matches = []
     
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
-                 for chaine1 in certifications_poste)
     
-    # certifs
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
-                 for chaine1 in campagne_skills)
+    # méthode à utiliser
+    for chaine1 in campagne_certifications:
+        for chaine2 in certifications:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+                
+                
+    for chaine1 in certifications_poste:
+        for chaine2 in certifications:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in campagne_skills:
+        for chaine2 in competences:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+                
+    for chaine1 in competences_poste:
+        for chaine2 in competences:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in campagne_degrees:
+        for chaine2 in diplomes:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in diplomes_poste:
+        for chaine2 in diplomes:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+                
+    for chaine1 in campagne_languages:
+        for chaine2 in langues:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in langues_poste:
+        for chaine2 in langues:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+                
+                
+    # outils
+
+  
+
     
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
-                 for chaine1 in competences_poste)
+
     
-    # certifs
-    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes)
-                 for chaine1 in campagne_degrees)
-    
-    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes)
-                 for chaine1 in diplomes_poste)
+   
     
     
     score += len(langues) >= campagne.minimum_number_of_languages
     score += len(experiences) >= campagne.minimum_number_of_experiences
     
-    
-    
-    # certifs
-    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
-                 for chaine1 in campagne_languages)
-    
-    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
-                 for chaine1 in langues_poste)
-    
-   
+  
+    score += len(matches)
 
     data = {
         "score": score,
@@ -335,8 +390,11 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
         "email": email,
         "nom_complet": nom,
         "telephone": telephone,
-        "texte_pdf": text,
-        "fichier": fname
+        # "texte_pdf": text,
+        "fichier": fname,
+        "matches": matches,
+        "poste" : result_poste[0],
+        "cv" : result[0]
     }
 
     return data
