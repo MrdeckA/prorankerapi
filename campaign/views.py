@@ -38,6 +38,7 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
 from langchain_openai import ChatOpenAI
 from langchain.chains import create_extraction_chain
+import threading
 
 
 class CampagneListeView(generics.ListCreateAPIView):
@@ -129,6 +130,18 @@ class CollaborationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CollaborationSerializer
 
 
+
+def invoke_in_thread(text, results_dict, chain, nom_fichier):
+    result = chain.invoke(text)
+    results_dict[nom_fichier] = result
+    texts[nom_fichier] = text
+
+
+
+results_one = {}
+texts = {}
+
+
 def make_ranking(request):
     try:
         llm = CampaignConfig.llm
@@ -178,33 +191,47 @@ def make_ranking(request):
         # valeurs_triees = scores
         # valeurs_triees = dict(sorted(scores.items(), key=lambda item: item[1]))
         # print(result)
+        
+        
+        # Créer des threads pour chaque élément de text_list
+        threads = []
+        for campagne_file in campagne_files:
+            nom_fichier = f"./{campagne_file['saving_name']}"
+            doc = fitz.open(nom_fichier)
+            text = "".join(page.get_text() for page in doc)
+            doc.close()
+                    
+            thread = threading.Thread(target=invoke_in_thread, args=(text, results_one, chain, nom_fichier))
+            threads.append(thread)
+            thread.start()
+
+        # Attendre que tous les threads se terminent
+        for thread in threads:
+            thread.join()
+
 
         for campagne_file in campagne_files:
             nom_fichier = f"./{campagne_file['saving_name']}"
             scores[nom_fichier] = calculating_score_for_a_andidate(
-                chain, campagne,  result_poste, request, nom_fichier)
+                results_one[nom_fichier], campagne,  result_poste, texts[nom_fichier], request, nom_fichier)
             print(f"done for {nom_fichier}")
 
         # rs = calculating_score_for_a_andidate(
         #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
 
-        return JsonResponse({"response": scores})
+        return JsonResponse({ "response" : scores})
         # return JsonResponse({"response": CampagneSerializer(campagne).data})
     except Exception as e:
         print(e)
         return JsonResponse({'message': str(e)})
 
 
-def calculating_score_for_a_andidate(chain, campagne: Campagne, result_poste, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
 
-    fname = fname
-    doc = fitz.open(fname)
-    text = "".join(page.get_text() for page in doc)
-    doc.close()
-    print("before")
 
-    result = chain.invoke(text)
-    print("after")
+
+
+
+def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, text, request={}, fname='./uploads/CV_Mériadeck_AMOUSSOU_ATUT.pdf'):
 
     # Exécution de la chaîne sur le texte du CV
 
