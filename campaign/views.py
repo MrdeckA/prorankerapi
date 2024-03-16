@@ -293,99 +293,41 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
 
     # scoring
     score = 0
+    # certifs
     score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
                  for chaine1 in campagne_certifications)
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
-                 for chaine1 in campagne_skills)
-###
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences)
-                 for chaine1 in campagne_certifications)
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils)
-                 for chaine1 in campagne_certifications)
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
-                 for chaine1 in campagne_certifications)
-
-    #
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences)
-                 for chaine1 in campagne_skills)
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils)
-                 for chaine1 in campagne_skills)
+    
     score += sum(any(chaine1 in chaine2 for chaine2 in certifications)
+                 for chaine1 in certifications_poste)
+    
+    # certifs
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
                  for chaine1 in campagne_skills)
-
-###
-    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
-                 for chaine1 in campagne_languages)
+    
+    score += sum(any(chaine1 in chaine2 for chaine2 in competences)
+                 for chaine1 in competences_poste)
+    
+    # certifs
     score += sum(any(chaine1 in chaine2 for chaine2 in diplomes)
                  for chaine1 in campagne_degrees)
-
+    
+    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes)
+                 for chaine1 in diplomes_poste)
+    
+    
     score += len(langues) >= campagne.minimum_number_of_languages
     score += len(experiences) >= campagne.minimum_number_of_experiences
-
-    # descrition + intitule
-
-
-###
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
-                 for chaine1 in certifications)
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
-                 for chaine1 in certifications)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
-                 for chaine1 in certifications)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
-                 for chaine1 in certifications)
-
-    #
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
-                 for chaine1 in experiences)
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
-                 for chaine1 in experiences)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
-                 for chaine1 in experiences)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
-                 for chaine1 in experiences)
-
-    #
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
-                 for chaine1 in outils)
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
-                 for chaine1 in outils)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
-                 for chaine1 in outils)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
-                 for chaine1 in outils)
-
-    #
-    score += sum(any(chaine1 in chaine2 for chaine2 in experiences_poste)
-                 for chaine1 in competences)
-    score += sum(any(chaine1 in chaine2 for chaine2 in certifications_poste)
-                 for chaine1 in competences)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in outils_poste)
-                 for chaine1 in competences)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in competences_poste)
-                 for chaine1 in competences)
-
-
-###
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in langues_poste)
-                 for chaine1 in langues)
-    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
-                 for chaine1 in diplomes)
-
-    score += sum(any(chaine1 in chaine2 for chaine2 in diplomes_poste)
-                 for chaine1 in campagne_degrees)
+    
+    
+    
+    # certifs
+    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
+                 for chaine1 in campagne_languages)
+    
+    score += sum(any(chaine1 in chaine2 for chaine2 in langues)
+                 for chaine1 in langues_poste)
+    
+   
 
     data = {
         "score": score,
