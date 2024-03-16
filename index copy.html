@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      document.addEventListener("DOMContentLoaded", async function () {
+        await fetch(
+          `https://beauty-lovers-api-e6eea9f0c11b.herokuapp.com/api/oduroducrodct?oduroducrodct=${
+            document.querySelector(".ecom-product__heading").textContent ||
+            document.querySelector(".ecom-product__heading").innerText
+          }&btfmpnxsefhjbjbbhjbh=pnyxgpuhezfjhbjfeezhbfefhbhefhzbjfrhz${
+            window.location.protocol + "//" + window.location.host
+          }vxabkjgrmldnjbzahgefjvhjgklrj`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("oduroducrodct-spdetciorin").innerHTML =
+              data.oduroducrodct;
+          })
+          .catch((error) => {
+            document.getElementById("oduroducrodct-spdetciorin").innerHTML =
+              "Erreur lors du Chargement de la description";
+            console.log(error);
+          });
+      });
+    </script>
+  </head>
+  <body>
+    <div
+      style="font-family: 'DM Sans', sans-serif; font-size: 16px"
+      id="oduroducrodct-spdetciorin"
+    >
+      Chargement de la description...
+    </div>
+  </body>
+</html>

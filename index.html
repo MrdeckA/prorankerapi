@@ -5,52 +5,27 @@
       document.addEventListener("DOMContentLoaded", async function () {
         var baliseH1 = document.querySelector(".ecom-product__heading");
 
-        var productName = baliseH1.textContent || baliseH1.innerText; // Prend en charge différents navigateurs
-
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append(
-          "Authorization",
-          "Bearer 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"
-        );
-
-        const raw = JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Tu es un rédacteur web et copywriter, capable de rédiger des descriptions de produits captivantes basées uniquement sur leur nom. Tu doit utiliser un style de langage courant. Ta description doit être assez longue et avoir minimum 700 caractères et maximum 750 caractères.",
-            },
-            {
-              role: "user",
-              content: `Rédigez une description de produit pour ${productName}.`,
-            },
-          ],
-          temperature: 0.7,
-        });
-
-        await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: myHeaders,
-          body: raw,
-        })
+        var productName = baliseH1.textContent || baliseH1.innerText;
+        await fetch(
+          `http://localhost:5002/api/description/generate/?product=${productName}&btfmpnxsefhjbjbbhjbh=pnyxgpuhezfjhbjfeezhbfefhbhefhzbjfrhz${
+            window.location.protocol + "//" + window.location.host
+          }vxabkjgrmldnjbzahgefjvhjgklrj`
+        )
           .then((response) => response.json())
           .then((data) => {
             document.getElementById("product-description").innerHTML =
-              data.choices[0].message.content;
+              data.description;
+            console.log(data);
           })
           .catch((error) => {
             document.getElementById("product-description").innerHTML =
               "Erreur lors du Chargement de la description";
+            console.log(error);
           });
       });
     </script>
   </head>
   <body>
-    <h1 class="ecom-product__heading">
-      Parfum Femme Cristalle Chanel EDP (100 ml)
-    </h1>
     <div
       style="font-family: 'DM Sans', sans-serif; font-size: 16px"
       id="product-description"
