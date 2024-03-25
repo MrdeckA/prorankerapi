@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_filters",
     'campaign',
-    'authentication',
    
 
 ]
