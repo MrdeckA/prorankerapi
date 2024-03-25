@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Campagne, Candidat, Collaboration
+from django.contrib.auth.models import User
 
 
 class CampagneAdmin(admin.ModelAdmin):
@@ -17,6 +18,8 @@ class CollaborationAdmin(admin.ModelAdmin):
 
 class CompetenceAdmin(admin.ModelAdmin):
     list_display = ('nom')
+
+
 
 
 admin.site.register(Campagne, CampagneAdmin)

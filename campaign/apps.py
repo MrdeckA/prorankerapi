@@ -12,7 +12,7 @@ class CampaignConfig(AppConfig):
     # def load_nlp_model(model_path):
     #     return spacy.load(model_path)
 
-    api_key = "sk-AWPhDAyMbvTvf04itkfpT3BlbkFJhRrt4ojmrwx3BmbCmBrnfv"
+    api_key = "sk-AWPhrgrzegDAyMrgergbvTvrgergf04itkfpT3BlbkFJhRrt4ojmrwx3BmbCmBrnfvfregrgrgegr"
     # api_key=""
 
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",
