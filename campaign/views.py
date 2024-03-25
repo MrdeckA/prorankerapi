@@ -144,29 +144,14 @@ texts = {}
 
 def make_ranking(request):
     try:
-        llm = CampaignConfig.llm
 
         campagne_id = request.GET.get('campagne')
 
         if campagne_id is None:
             return JsonResponse({"error": "Paramètre 'campagne' manquant dans la requête."})
 
-        schema = {
-            "properties": {
-                "nom": {"type": "string"},
-                "email": {"type": "string"},
-                "telephone": {"type": "string"},
-                "experiences": {"type": "array", "items": {"type": "string"}},
-                "diplomes": {"type": "array", "items": {"type": "string"}},
-                "competences": {"type": "array", "items": {"type": "string"}},
-                "outils": {"type": "array", "items": {"type": "string"}},
-                "langues": {"type": "array", "items": {"type": "string"}},
-                "certifications": {"type": "array", "items": {"type": "string"}},
-            },
-            "required": ["nom", "email"]
-        }
-
-        chain = create_extraction_chain(schema, llm, verbose=True)
+      
+        chain = CampaignConfig.chain
 
         campagne = get_object_or_404(Campagne, id=campagne_id)
         poste = f"{campagne.description_poste} {campagne.intitule_poste}"
@@ -369,6 +354,36 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
                 
                 
     # outils
+    for chaine1 in campagne_certifications:
+        for chaine2 in outils:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in campagne_skills:
+        for chaine2 in outils:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+    for chaine1 in certifications_poste:
+        for chaine2 in outils:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
+                
+    for chaine1 in competences_poste:
+        for chaine2 in outils:
+            if chaine1 in chaine2:
+                matches.append({
+                "source" : chaine1,
+                "dest" : chaine2,
+                })
 
   
 
@@ -376,10 +391,9 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
 
     
    
-    
-    
-    score += len(langues) >= campagne.minimum_number_of_languages
-    score += len(experiences) >= campagne.minimum_number_of_experiences
+    if score >= 2 : 
+        score += len(langues) >= campagne.minimum_number_of_languages
+        score += len(experiences) >= campagne.minimum_number_of_experiences
     
   
     score += len(matches)
@@ -391,7 +405,7 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
         "nom_complet": nom,
         "telephone": telephone,
         # "texte_pdf": text,
-        "fichier": fname,
+        "fichier": fname.lstrip("./"),
         "matches": matches,
         "poste" : result_poste[0],
         "cv" : result[0]

@@ -6,17 +6,34 @@ from langchain.chains import create_extraction_chain
 
 
 class CampaignConfig(AppConfig):
-    @staticmethod
+    # @staticmethod
     # Utilisez maxsize=None pour un cache de taille illimitée
-    @lru_cache(maxsize=None)
-    def load_nlp_model(model_path):
-        return spacy.load(model_path)
+    # @lru_cache(maxsize=None)
+    # def load_nlp_model(model_path):
+    #     return spacy.load(model_path)
 
-    # api_key = " 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"
-    api_key=""
+    api_key = "sk-AWPhDAyMbvTvf04itkfpT3BlbkFJhRrt4ojmrwx3BmbCmBrnfv"
+    # api_key=""
 
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",
-                     api_key=api_key, verbose=True)
+                     api_key=api_key)
+    
+    schema = {
+            "properties": {
+                "nom": {"type": "string"},
+                "email": {"type": "string"},
+                "telephone": {"type": "string"},
+                "experiences": {"type": "array", "items": {"type": "string"}},
+                "diplomes": {"type": "array", "items": {"type": "string"}},
+                "competences": {"type": "array", "items": {"type": "string"}},
+                "outils": {"type": "array", "items": {"type": "string"}},
+                "langues": {"type": "array", "items": {"type": "string"}},
+                "certifications": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["nom", "email"]
+        }
+
+    chain = create_extraction_chain(schema, llm)
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "campaign"

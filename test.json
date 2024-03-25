@@ -1,0 +1,180 @@
+[
+    {
+        "fichier": "Alice Clark CV_dz2IVFt.pdf",
+        "nom": "Alice Clark",
+        "email": "Email me on Indeed",
+        "experiences": [
+            "20+ years of experience in data handling, design, and development"
+        ],
+        "diplomes": [
+            "Indian Institute of Technology – Mumbai"
+        ],
+        "competences": [
+            "Machine Learning",
+            "Natural Language Processing",
+            "Big Data Handling"
+        ],
+        "outils": [
+            "Microsoft Azure",
+            "SQL",
+            "Power BI",
+            "U-SQL"
+        ],
+        "langues": [],
+        "certifications": []
+    },
+    {
+        "fichier": "cv5_gawgKBV.pdf",
+        "nom": "Emma Smith",
+        "email": "emma.smith@gnail.com",
+        "experiences": [
+            "HR budget management for Recruitment and Development including phasing analysis and monthly reporting.",
+            "Recruitment and Onboarding of talents for Sales, Marketing, Communications, Trade Marketing, Finance, Compatibility, Operations and HR from apprentices, interns, Young Graduates, VIEs and full time roles.",
+            "Acted as a consultant to the CEO and Founder team in defining the organisational structure, job descriptions, roles and responsibilities for the eCommerce team.",
+            "Upskilled and train managers on best practice low level HR to allow them to take ownership and accountability of their times.",
+            "Successfully set up a new entity and worked closely with legal and external bodies.",
+            "Managed the recruiting process internally - interviews / 2nd interviews / trials etc.",
+            "Wrote and delivered weekly training sessions for sales team."
+        ],
+        "diplomes": [
+            "HUMAN RESOURCES MASTER’S - University of Liverpool",
+            "HUMAN RESOURCES DEGREE – Keele University"
+        ],
+        "competences": [
+            "Communication",
+            "HR Policies",
+            "Management",
+            "Leadership"
+        ],
+        "langues": [
+            "English",
+            "French",
+            "Spanish"
+        ],
+        "telephone": "+39 999 999 999"
+    },
+    {
+        "fichier": "cv16_41I9X84.pd",
+        "nom": "Tanguy Fichot",
+        "email": "tanguyfichot@gmail.com",
+        "telephone": "(+33) 0648736607",
+        "experiences": [
+            "ASSISTANT ARCHIVISTE NUMEN EUROPE",
+            "ASISTANT-ARCHIVISTE DAT@RCHIV",
+            "STAGIAIRE RADIO DIJON CAMPUS",
+            "STAGE DE PROFESSEUR DOCUMENTALISTE COLLÈGE MARCELLE PARDÉ",
+            "STAGE DE PROFESSEUR DOCUMENTALISTE LYCÉE PROFESSIONNEL ANTOINE ANTOINE",
+            "STAGIAIRE VILLE D'AUTUN",
+            "ADJOINT DU PATRIMOINE 2ÈME CLASSE VILLE D'AUTUN"
+        ],
+        "diplomes": [
+            "MASTER ARCHIVES DES XXÈME ET XXIÈME SIÈCLES EUROPÉENS",
+            "MASTER MÉTIERS DE L'ENSEIGNEMENT ET DE LA FORMATION : PROFESSEUR DOCUMENTALISTE",
+            "MASTER MONDES ANCIENS ET MÉDIÉVAUX : SPÉCIALITÉ ÉTUDES MÉDIÉVALES",
+            "LICENCE D'HISTOIRE",
+            "C2I (CERTIFICAT INFORMATIQUE ET INTERNET) NIVEAU 1"
+        ],
+        "competences": [
+            "Récolement et catalogage d'un fonds",
+            "Rédaction de bordeaux d'archivage",
+            "Rédigez des bordereaux de versement ou d'élimitationd'archives",
+            "Méthodes de classement d'un fonds d'archives ou documentaire",
+            "Droit de la propriété intellectuelle",
+            "Rechercher et sélectionner des informations documentaires",
+            "Déﬁnir des règles de conservation des documents (accès, diﬀ usion, élimination)",
+            "Normes rédactionnelles",
+            "Connaissances des normes rédactionnelles en archivistique",
+            "Mettre à disposition d'un public des fonds documentaires",
+            "Discrétion",
+            "Persévérance",
+            "Curiosité intellectuelle",
+            "Travaille en équipe",
+            "Autonomie"
+        ],
+        "outils": [
+            "zotero",
+            "Mozilla Thunderbird",
+            "Gmail",
+            "Outlook",
+            "Microsoft Powerpoint",
+            "Microsoft Word",
+            "Microsoft Oﬃce",
+            "Microsoft Excel"
+        ],
+        "langues": [
+            "FRANÇAIS",
+            "ANGLAIS"
+        ],
+        "certifications": [
+            "Niveaux: A1 et A2: utilisateur de base; B1 et B2: utilisateur indépendant; C1 et C2: utilisateur expérimenté"
+        ]
+    },
+    {
+        "fichier": "cv22_mIKruNu.pdf",
+        "nom": "Mériadeck AMOUSSOU",
+        "email": "mrdeck30@gmail.com",
+        "telephone": "+229 52 74 69 12",
+        "diplomes": [
+            "Licence en Génie Logiciel"
+        ],
+        "experiences": [
+            "Développeur web Full stack",
+            "Développeur web Full stack",
+            "Développeur web Full stack",
+            "Développeur web Full stack"
+        ],
+        "competences": [
+            "Langages de programmation web : HTML, CSS, Javascript/Typescript, PHP",
+            "Langages de programmation C, C++, python, Java",
+            "Framework : Laravel, Vue.js/Nuxt.js, Angular, Django, Express.js, Flask, Flutter",
+            "Data Science : Collecte, Nettoyage, Analyse des données, Machine Leaning avec Scikit-Learn",
+            "CMS : Wordpress",
+            "Base de données : MySQL, MonGoDB, Firestore, Oracle",
+            "Cloud : AWS, DigitalOcean, Heroku, Docker, Vercel",
+            "Conception et Design : Figma, Adobe XD"
+        ],
+        "outils": [
+            "Trello",
+            "Github",
+            "Gitlab"
+        ],
+        "langues": [
+            "Français",
+            "Anglais"
+        ]
+    },
+    {
+        "fichier": "cv23_S5qcHG5.pdf",
+        "nom": "DOSSOU",
+        "email": "sydneydossou400@gmail.com",
+        "telephone": "+229 51588057/40544934",
+        "experiences": [
+            "Stage de fin de formation à l'ASIN",
+            "Développeur web / 2022- 2023"
+        ],
+        "diplomes": [
+            "LICENCE PROFESSIONNELLE EN Informatique de gestion",
+            "BACCALAURÉAT SÉRIE D"
+        ],
+        "competences": [
+            "Travail en équipe",
+            "Détermination et Endurance",
+            "Flexibilité et Adaptation",
+            "Analyses et modélisation avec : Uml et Mérises",
+            "Struture de gestions des bases données : MongoDB,Mysql",
+            "Développement frontend avec : HTML,CSS,JS,BOOTSTRAP,TAILWIND,Vuejs,MDBvue5",
+            "Développement backend avec : Nodejs , Expressjs , PHP, Python"
+        ],
+        "outils": [
+            "GitHub",
+            "nodejs",
+            "vuejs"
+        ],
+        "langues": [
+            "Français"
+        ],
+        "certifications": [
+            "Stage académique à l’Agence des Systèmes d´informations et du Numérique (ASIN)"
+        ]
+    }
+]
