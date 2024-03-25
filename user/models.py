@@ -16,9 +16,10 @@ class MonUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_admin', True)
-
+        
         if extra_fields.get('is_admin') is not True:
             raise ValueError('Le superutilisateur doit avoir is_admin=True.')
 
@@ -37,8 +38,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = MonUserManager()
 
-    USERNAME_FIELD = 'id'
-    REQUIRED_FIELDS = ['email', 'password']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['password']
 
     def __str__(self):
         return self.email
