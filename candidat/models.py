@@ -7,12 +7,11 @@ class Candidat(models.Model):
         Campagne, on_delete=models.CASCADE, related_name='candidats')
     nom = models.CharField(max_length=255, blank=True)
     prenom = models.CharField(max_length=255, blank=True)
-    cv_path = models.TextField(blank=True)
-    adresse = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
+    cv_path = models.CharField(blank=True)
+    adresse = models.CharField(blank=True)
+    prenom = models.CharField(blank=True)
     telephone = models.CharField(max_length=15, blank=True)
-    cv_data_url = models.TextField(blank=False)  # Champs requis
-    cv_original_name = models.TextField(
+    cv_original_name = models.CharField(
         blank=False)  # Champs requis
 
     def __str__(self):

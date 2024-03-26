@@ -4,11 +4,11 @@ from django.contrib import admin
 from .models import Campagne
 
 
-class UserAdmin(admin.ModelAdmin):
+class CampagneAdmin(admin.ModelAdmin):
     list_display = ('nom', 'intitule_poste', 'user')
 
 
 
 
-admin.site.register(Campagne, UserAdmin)
+admin.site.register(Campagne, CampagneAdmin)
 
