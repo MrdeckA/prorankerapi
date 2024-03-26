@@ -14,17 +14,22 @@ class ObtainTokenSerializer(serializers.Serializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     
     is_admin = serializers.BooleanField(required=False)
+    nom = serializers.CharField(required=False)
+    prenom = serializers.CharField(required=False)
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'is_admin']
+        fields = ['email', 'password', 'is_admin', 'nom', 'prenom']
         
 class UserManageSerializer(serializers.ModelSerializer):
     
     email = serializers.EmailField(required=False)
     password = serializers.CharField(required=False)
     is_admin = serializers.BooleanField(required=False)
+    nom = serializers.CharField(required=False)
+    password = serializers.CharField()
+
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'is_admin']
+        fields = ['email', 'password', 'is_admin', 'nom', 'prenom']
