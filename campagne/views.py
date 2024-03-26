@@ -1,13 +1,17 @@
 from django.shortcuts import render
 from .models import Campagne
 from .serializer import CampagneSerializer
-from .filters import CollaborationFilter, CampagneFilter, CandidatFilter
+from .filters import CampagneFilter
+from candidat.filters import CandidatFilter
+from collaboration.filters import CollaborationFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.files.storage import FileSystemStorage
 from rest_framework.response import Response
-from rest_framework import generics
 import json
 from rest_framework import status
+from rest_framework import mixins, generics, status
+from rest_framework.permissions import IsAuthenticated
+from .permissions import AllPermission
 
 
 
@@ -18,6 +22,7 @@ class CampagneListeView(generics.ListCreateAPIView):
     serializer_class = CampagneSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CampagneFilter
+    permission_classes = [IsAuthenticated, AllPermission]
 
     def post(self, request):
         try:
@@ -73,6 +78,16 @@ class CampagneListeView(generics.ListCreateAPIView):
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class CampagneDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    
+    
+class CampagneDetailView(mixins.ListModelMixin, generics.GenericAPIView):
+    
     queryset = Campagne.objects.all()
     serializer_class = CampagneSerializer
+    permission_classes = [IsAuthenticated, AllPermission]
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    
+    

@@ -1,7 +1,7 @@
 from django.db import models
 from campagne.models import Campagne
 # Create your models here.
-
+import uuid
 class Candidat(models.Model):
     campagne = models.ForeignKey(
         Campagne, on_delete=models.CASCADE, related_name='candidats')

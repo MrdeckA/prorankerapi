@@ -1,6 +1,8 @@
 from django_filters import rest_framework as filters
 import django_filters
-from .models import Campagne, Candidat, Collaboration
+from .models import Campagne
+from candidat.models import Candidat
+from collaboration.models import Collaboration
 from django.db import models
 
 

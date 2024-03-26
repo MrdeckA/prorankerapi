@@ -2,6 +2,7 @@ from django.db import models
 from user.models import User
 
 # Create your models here.
+import uuid
 
 class Campagne(models.Model):
     nom = models.CharField(max_length=255, blank=False, default="")
