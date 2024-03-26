@@ -19,17 +19,17 @@ class UserCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'is_admin', 'nom', 'prenom']
+        fields = ['email', 'is_admin', 'nom', 'prenom']
         
 class UserManageSerializer(serializers.ModelSerializer):
     
     email = serializers.EmailField(required=False)
-    password = serializers.CharField(required=False)
     is_admin = serializers.BooleanField(required=False)
     nom = serializers.CharField(required=False)
-    password = serializers.CharField()
+    prenom = serializers.CharField(required=False)
+    password = serializers.CharField(required=False)
 
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'is_admin', 'nom', 'prenom']
+        fields = ['email', 'is_admin', 'nom', 'prenom', 'password']

@@ -14,6 +14,7 @@ class MonUserManager(BaseUserManager):
             raise ValueError('Le nom est obligatoire !')
         if not prenom:
             raise ValueError('Le prénom est obligatoire !')
+    
         email = self.normalize_email(email)
         user = self.model(email=email, nom=nom, prenom=prenom, **extra_fields)
         user.set_password(password)
@@ -50,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = MonUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['password', 'nom', 'prenom']
+    REQUIRED_FIELDS = ['nom', 'prenom']
 
     def __str__(self):
         return self.email
