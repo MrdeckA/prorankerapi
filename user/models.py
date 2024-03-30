@@ -1,19 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 import uuid
-# Create your models here.
-
 
 class MonUserManager(BaseUserManager):
     def create_user(self, email, password, nom, prenom, **extra_fields):
         if not email:
-            raise ValueError('L\'adresse e-mail est obligatoire !')
+            raise ValidationError({'email': 'L\'adresse e-mail est obligatoire !'}, code=status.HTTP_400_BAD_REQUEST)
         if not password:
-            raise ValueError('Le mot de passe est obligatoire !')
+            raise ValidationError({'password': 'Le mot de passe est obligatoire !'}, code=status.HTTP_400_BAD_REQUEST)
         if not nom:
-            raise ValueError('Le nom est obligatoire !')
+            raise ValidationError({'nom': 'Le nom est obligatoire !'}, code=status.HTTP_400_BAD_REQUEST)
         if not prenom:
-            raise ValueError('Le prénom est obligatoire !')
+            raise ValidationError({'prenom': 'Le prénom est obligatoire !'}, code=status.HTTP_400_BAD_REQUEST)
     
         email = self.normalize_email(email)
         user = self.model(email=email, nom=nom, prenom=prenom, **extra_fields)
@@ -29,7 +30,7 @@ class MonUserManager(BaseUserManager):
         email = self.normalize_email(email)
         
         if extra_fields.get('is_admin') is not True:
-            raise ValueError('Le superutilisateur doit avoir is_admin=True.')
+            raise ValidationError({'is_admin': 'Le superutilisateur doit avoir is_admin=True.'}, code=status.HTTP_400_BAD_REQUEST)
 
         return self.create_user(email=email, password=password, nom=nom, prenom=prenom, **extra_fields)
     
@@ -40,8 +41,8 @@ class MonUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    nom = models.TextField(default="")
-    prenom = models.TextField(default="")
+    nom = models.CharField(max_length=255)
+    prenom = models.CharField(max_length=255)
     email_valid = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -51,6 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = MonUserManager()
 
     USERNAME_FIELD = 'email'
+    
     REQUIRED_FIELDS = ['nom', 'prenom']
 
     def __str__(self):

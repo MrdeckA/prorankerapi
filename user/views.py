@@ -18,12 +18,13 @@ from .permissions import ManagePermission
 
 
 # Create your views here.
+
 class CreateUserView(mixins.CreateModelMixin, generics.GenericAPIView):
     
     queryset = User.objects.all()
     serializer_class = UserSerializer
     
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         
         serializer = UserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -38,19 +39,8 @@ class CreateUserView(mixins.CreateModelMixin, generics.GenericAPIView):
             user = User.objects.create_superuser(email=email, password=password, nom=nom, prenom=prenom, is_admin=is_admin)
         else:
             user = User.objects.create_user(email=email, password=password, nom=nom, prenom=prenom,)
-        # else:
-        #     return Response(({'detail':'Vous devez choisir un rôle pour l\'utilisateur.'}), status=status.HTTP_400_BAD_REQUEST)
-        
-        # # Envoyez l'e-mail de confirmation ici (utilisez Django's Emaildetail ou un package d'envoi d'e-mails tiers)
-        # sujet = 'Confirmation de l\'adresse mail.'
-        # url = 'http://127.0.0.1:8000/api/v1/user/mail-verification/' + str(user.id)
-        # message = 'Merci de vous être inscrit sur notre site.\n Veuillez vérifier votre addresse mail sur l\'endpoint: ' + url
-        # de = 'votre@email.com'
-        # destinataires = [email]
-
-        # send_mail(sujet, message, de, destinataires, fail_silently=False)
-        
-        return Response((self.serializer_class(user).data), status=status.HTTP_200_OK)
+  
+        return Response(self.get_serializer(user).data, status=status.HTTP_201_CREATED)
    
    
    
@@ -65,6 +55,8 @@ class AllUserView(mixins.ListModelMixin, generics.GenericAPIView):
         return self.list(request, *args, **kwargs)
 
 
+
+
 class ObtainTokenView(views.APIView):
     
     serializer_class = ObtainTokenSerializer
@@ -76,15 +68,18 @@ class ObtainTokenView(views.APIView):
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
 
-        user = User.objects.get(email=email)
-
-        if user is None or not user.check_password(password):
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
             return Response({'detail': 'E-mail ou mot de passe invalide !'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Generate the JWT token
+        if not user.check_password(password):
+            return Response({'detail': 'E-mail ou mot de passe invalide !'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Générer le token JWT
         jwt_token = JWTAuthentication.create_jwt(user)
 
-        return Response({'token': jwt_token, 'user' : UserSerializer(user).data})
+        return Response({'token': jwt_token, 'user': UserSerializer(user).data})
     
     
     
