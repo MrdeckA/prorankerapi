@@ -9,13 +9,9 @@ class Candidat(models.Model):
     email = models.EmailField(max_length=255, blank=True)
     fichier = models.CharField(blank=True)
     fichier_sauvegarde = models.CharField(blank=True)
-    adresse = models.CharField(blank=True)
-    prenom = models.CharField(blank=True)
-    telephone = models.CharField(max_length=15, blank=True)
-    cv_original_name = models.CharField(
-        blank=False)  # Champs requis
+    telephone = models.CharField(max_length=255, blank=True)
     matches = models.JSONField(blank=False, default=None)
 
 
     def __str__(self):
-        return f'{self.prenom} {self.nom} - Campagne: {self.campagne.nom}'
+        return f'{self.nom_complet} - Campagne: {self.campagne.nom}'

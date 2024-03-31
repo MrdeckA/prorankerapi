@@ -1,0 +1,21 @@
+campagne_id = request.GET.get('campagne')
+
+            if campagne_id is None:
+                return Response({"error": "Paramètre 'campagne' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+            campagne = get_object_or_404(Campagne, id=campagne_id)
+
+            scores = {}
+
+            scores_keys = respo.keys()
+            for score_key in scores_keys:
+                candidat = Candidat()
+                candidat.campagne = campagne
+                candidat.nom_complet = respo[score_key]["nom_complet"]
+                candidat.email = respo[score_key]["email"]
+                candidat.telephone = respo[score_key]["telephone"]
+                candidat.fichier = respo[score_key]["fichier"]
+                candidat.fichier_sauvegarde = score_key
+                candidat.matches = respo[score_key]["matches"]
+                candidat.save()
