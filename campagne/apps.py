@@ -8,7 +8,6 @@ class CampagneConfig(AppConfig):
     
     
     api_key = "sk-AWPhrgrzegDAyMrgergbvTvrgergf04itkfpT3BlbkFJhRrt4ojmrwx3BmbCmBrnfvfregrgrgegr"
-    # api_key = "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"
     # api_key=""
 
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",

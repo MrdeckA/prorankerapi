@@ -20,7 +20,6 @@ import threading
 import re
 from candidat.models import Candidat
 
-
 results_one = {}
 texts = {}
 
@@ -323,14 +322,69 @@ class CampagneRankingView(generics.ListCreateAPIView):
     
     def get(self, request, *args, **kwargs):
         try:
-            
-            
-            
+
+            campagne_id = request.GET.get('campagne')
+
+            if campagne_id is None:
+                return Response({"error": "Paramètre 'campagne' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
+
         
-            
-            
+            chain = CampagneConfig.chain
+
+            campagne = get_object_or_404(Campagne, id=campagne_id)
+            poste = f"{campagne.description_poste} {campagne.intitule_poste}"
+            # print(json.loads(campagne.files)[0])
+            campagne_files = json.loads(campagne.files)
+
+            result_poste = chain.invoke(poste)
+
+            scores = {}
+
         
-            return Response({ "response" : }, status=status.HTTP_200_OK)
+            threads = []
+            for campagne_file in campagne_files:
+                nom_fichier = f"./uploads/{campagne_file['saving_name']}"
+                doc = fitz.open(nom_fichier)
+                text = "".join(page.get_text() for page in doc)
+                doc.close()
+                        
+                thread = threading.Thread(target=invoke_in_thread, args=(text, results_one, chain, nom_fichier))
+                threads.append(thread)
+                thread.start()
+
+            # Attendre que tous les threads se terminent
+            for thread in threads:
+                thread.join()
+
+
+            for campagne_file in campagne_files:
+                nom_fichier = f"./uploads/{campagne_file['saving_name']}"
+                scores[nom_fichier] = calculating_score_for_a_andidate(
+                    results_one[nom_fichier], campagne,  result_poste, texts[nom_fichier], request, nom_fichier)
+                print(f"done for {nom_fichier}")
+                
+                
+                
+
+
+            scores_keys = scores.keys()
+            for score_key in scores_keys:
+                candidat = Candidat()
+                candidat.campagne = campagne
+                candidat.nom_complet = scores[score_key]["nom_complet"]
+                candidat.email = scores[score_key]["email"]
+                candidat.telephone = scores[score_key]["telephone"]
+                candidat.fichier = scores[score_key]["fichier"]
+                candidat.fichier_sauvegarde = score_key
+                candidat.matches = scores[score_key]["matches"]
+                candidat.save()
+
+            # rs = calculating_score_for_a_andidate(
+            #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
+            
+            
+
+            return Response({ "response" : scores}, status=status.HTTP_200_OK)
             # return JsonResponse({"response": CampagneSerializer(campagne).data})
         except Exception as e:
             print(e)

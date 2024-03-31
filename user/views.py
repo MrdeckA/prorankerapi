@@ -13,10 +13,12 @@ from user.models import User
 # from user.permissions import AllUserPermission, ManagePermission
 from user.authentication import JWTAuthentication
 from .permissions import ManagePermission
+from django.shortcuts import get_object_or_404
+from campagne.models import Campagne
+from collaboration.models import Collaboration
+from candidat.models import Candidat
 
-
-
-
+import json
 # Create your views here.
 
 class CreateUserView(mixins.CreateModelMixin, generics.GenericAPIView):
@@ -55,6 +57,25 @@ class AllUserView(mixins.ListModelMixin, generics.GenericAPIView):
     
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+
+
+class UserStatsView(mixins.ListModelMixin, generics.GenericAPIView):
+    
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, ManagePermission]
+    # permission_classes = [IsAuthenticated, AllUserPermission]
+    
+    def get(self, request, id, *args, **kwargs):
+        user=  get_object_or_404(User, id=id)
+        user_campagnes = Campagne.objects.filter(user_id=user.id)
+        user_collaborations = Collaboration.objects.filter(inviteur_id=user.id)
+        user_candidats = Candidat.objects.filter(campagne__user_id=user.id)
+        files = 0
+        for user_campagne in user_campagnes:
+            files = files  + len(json.loads(user_campagne.files))
+        return Response({ "candidates" : len(user_candidats), "files" : files,  "recruitments" : len(user_campagnes), "collaborators" : len(user_collaborations) }, status=status.HTTP_200_OK)
 
 
 
