@@ -97,7 +97,9 @@ ROOT_URLCONF = "prorankersapi.urls"
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True  # Autorise toutes les origines (à ajuster en production)
+CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization']
 
 CORS_ORIGIN_WHITELIST = (
     "http://localhost:3000",

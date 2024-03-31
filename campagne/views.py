@@ -257,7 +257,6 @@ class CampagneListeView(generics.ListCreateAPIView):
     serializer_class = CampagneSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = CampagneFilter
-    permission_classes = [IsAuthenticated, AllPermission]
 
     def post(self, request):
         try:
@@ -271,7 +270,7 @@ class CampagneListeView(generics.ListCreateAPIView):
                 saving_name = FileSystemStorage("./uploads").get_available_name(fichier.name)
 
                 # Sauvegarder le fichier avec le nouveau nom
-                storage = FileSystemStorage()
+                storage = FileSystemStorage("./uploads")
                 storage.save(saving_name, fichier)
 
                 # Récupérer le nom d'origine du fichier (original name)
@@ -366,12 +365,17 @@ class CampagneRankingView(generics.ListCreateAPIView):
 
             # rs = calculating_score_for_a_andidate(
             #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
+            
+            
 
             return Response({ "response" : scores}, status=status.HTTP_200_OK)
             # return JsonResponse({"response": CampagneSerializer(campagne).data})
         except Exception as e:
             print(e)
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
     
 

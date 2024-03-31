@@ -28,12 +28,14 @@ class CreateUserView(mixins.CreateModelMixin, generics.GenericAPIView):
         
         serializer = UserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        print(serializer)
         
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
         nom = serializer.validated_data.get('nom')
         prenom = serializer.validated_data.get('prenom')
         is_admin = serializer.validated_data.get('is_admin')
+        
         
         if is_admin is not None:
             user = User.objects.create_superuser(email=email, password=password, nom=nom, prenom=prenom, is_admin=is_admin)
@@ -107,11 +109,9 @@ class ManageView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.Gen
         prenom = serializer.validated_data.get('prenom')
         is_staff = serializer.validated_data.get('is_staff')
         is_admin = serializer.validated_data.get('is_admin')
-        print(request)
 
         # user.set_password(user.password)
         update_fields = []
-        print(password)
         
         if email is not None and (request.user.is_admin or request.user == user):
             
