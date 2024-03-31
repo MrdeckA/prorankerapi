@@ -18,6 +18,7 @@ import fitz
 from unidecode import unidecode
 import threading
 import re
+from candidat.models import Candidat
 
 
 results_one = {}
@@ -322,53 +323,199 @@ class CampagneRankingView(generics.ListCreateAPIView):
     
     def get(self, request, *args, **kwargs):
         try:
-
+            respo =  {
+        "./uploads/cv18.pdf": {
+            "score": 9,
+            "email": "mrdeck30@gmail.com",
+            "nom_complet": "AMOUSSOU MÉRIADECK",
+            "telephone": "+229 52 74 69 12",
+            "fichier": "cv18.pdf",
+            "matches": [
+                {
+                    "source": "java",
+                    "dest": "programmationweb:htmlcssjavascripttypescriptphp"
+                },
+                {
+                    "source": "java",
+                    "dest": "langagesdeprogrammationcc++pythonjava"
+                },
+                {
+                    "source": "python",
+                    "dest": "langagesdeprogrammationcc++pythonjava"
+                },
+                {
+                    "source": "mongodb",
+                    "dest": "basededonnees:mysqlmongodbfirestoreoraclepostgresqlmssqlserver"
+                },
+                {
+                    "source": "html",
+                    "dest": "programmationweb:htmlcssjavascripttypescriptphp"
+                },
+                {
+                    "source": "licence",
+                    "dest": "licenceengenielogiciel(ans)(eninstancedesoutennce)"
+                },
+                {
+                    "source": "bac",
+                    "dest": "baccalaureatseried"
+                },
+                {
+                    "source": "anglais",
+                    "dest": "francais&anglais:luecritparle"
+                },
+                {
+                    "source": "francais",
+                    "dest": "francais&anglais:luecritparle"
+                }
+            ],
+            "poste": {
+                "nom": "ingénieur développeur Python"
+            },
+            "cv": {
+                "nom": "AMOUSSOU MÉRIADECK",
+                "email": "mrdeck30@gmail.com",
+                "telephone": "+229 52 74 69 12",
+                "experiences": [
+                    "Développeur Web Full Stack Javascript (A distance) : De Octobre 2023 à maintenant",
+                    "Stagiaire, Développeur Web : D'avril 2023 à juin 2023",
+                    "Stagiaire, Développeur Web : D'août 2022 à septembre 2022"
+                ],
+                "diplomes": [
+                    "Licence en Génie Logiciel (3/3ans) (En instance de soutennce)",
+                    "Baccalauréat série D",
+                    "Brevet d’Etude du Premier Cycle (BEPC)"
+                ],
+                "competences": [
+                    "Programmation web : HTML, CSS, Javascript/Typescript, PHP",
+                    "Langages de programmation C, C++, python, Java",
+                    "Framework : Laravel, Express.js, Vue.js/Nuxt.js, Flutter, Flask, Django, Angular",
+                    "Data Science : Collecte, Nettoyage, Analyse des données, Machine Leaning avec Scikit-Learn",
+                    "CMS : Wordpress",
+                    "Base de données : MySQL, MongoDB, Firestore, Oracle, PostgreSQL, MS SQL Server",
+                    "Cloud : AWS, Digital Ocean, Heroku, Docker, Vercel",
+                    "Conception et Design : Figma, Adobe XD",
+                    "Bonne maîtrise de la méthodologie de gestion d’un projet informatique"
+                ],
+                "langues": [
+                    "Fon : parlé",
+                    "Français & Anglais : lu, écrit, parlé"
+                ]
+            }
+        },
+        "./uploads/cv19.pdf": {
+            "score": 1,
+            "email": "n.nursing@selu.edu",
+            "nom_complet": "Your Name",
+            "telephone": "985-549-2222",
+            "fichier": "cv19.pdf",
+            "matches": [
+                {
+                    "source": "bac",
+                    "dest": "bachelorofsciencenursing"
+                }
+            ],
+            "poste": {
+                "nom": "ingénieur développeur Python"
+            },
+            "cv": {
+                "nom": "Your Name",
+                "email": "n.nursing@selu.edu",
+                "telephone": "985-549-2222",
+                "diplomes": [
+                    "Bachelor of Science, Nursing"
+                ],
+                "certifications": [
+                    "Registered Nurse",
+                    "Basic Life Support for Healthcare Providers (BLS)",
+                    "Advanced Cardiac Life Support (ACLS)",
+                    "Mask Fit Test Certification"
+                ],
+                "experiences": [
+                    "Medical-Surgery Rotation",
+                    "Obstetrics & Gynecology Rotation",
+                    "Camp Counselor",
+                    "Server"
+                ],
+                "competences": [
+                    "Perform basic cardiac life support (BLS)",
+                    "Administer PO and IV medication precisely",
+                    "Plan lessons and activities for children",
+                    "Collaborate with team to provide high-quality service"
+                ],
+                "outils": [
+                    "forceps",
+                    "hemostats",
+                    "nebulizers",
+                    "otoscopes"
+                ],
+                "langues": [
+                    "English"
+                ]
+            }
+        },
+        "./uploads/cv20.pdf": {
+            "score": 1,
+            "email": "first.lastname@selu.edu",
+            "nom_complet": "YOUR NAME",
+            "telephone": "555-555-5555",
+            "fichier": "cv20.pdf",
+            "matches": [
+                {
+                    "source": "bac",
+                    "dest": "bachelorofartsincriminaljustice"
+                }
+            ],
+            "poste": {
+                "nom": "ingénieur développeur Python"
+            },
+            "cv": {
+                "nom": "YOUR NAME",
+                "email": "first.lastname@selu.edu",
+                "telephone": "555-555-5555",
+                "experiences": [
+                    "Intern",
+                    "Senior Staff Reporter",
+                    "Administrative Assistant",
+                    "Philanthropy Events Chair",
+                    "Mentor"
+                ],
+                "diplomes": [
+                    "Bachelor of Arts in Criminal Justice"
+                ],
+                "competences": [
+                    "Microsoft Office Suite"
+                ],
+                "langues": [
+                    "French"
+                ]
+            }
+        }
+    }
             campagne_id = request.GET.get('campagne')
 
             if campagne_id is None:
                 return Response({"error": "Paramètre 'campagne' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
 
-        
-            chain = CampagneConfig.chain
 
-            campagne = get_object_or_404(Campagne, id=campagne_id)
-            poste = f"{campagne.description_poste} {campagne.intitule_poste}"
-            # print(json.loads(campagne.files)[0])
-            campagne_files = json.loads(campagne.files)
-
-            result_poste = chain.invoke(poste)
 
             scores = {}
 
+            scores_keys = respo.keys()
+            for score_key in scores_keys:
+                candidat = Candidat()
+                candidat.campagne = campagne_id
+                candidat.nom_complet = respo[score_key]["nom_complet"]
+                candidat.email = respo[score_key]["email"]
+                candidat.telephone = respo[score_key]["telephone"]
+                candidat.fichier = respo[score_key]["fichier"]
+                candidat.matches = respo[score_key]["matches"]
+                candidat.save()
+            
         
-            threads = []
-            for campagne_file in campagne_files:
-                nom_fichier = f"./uploads/{campagne_file['saving_name']}"
-                doc = fitz.open(nom_fichier)
-                text = "".join(page.get_text() for page in doc)
-                doc.close()
-                        
-                thread = threading.Thread(target=invoke_in_thread, args=(text, results_one, chain, nom_fichier))
-                threads.append(thread)
-                thread.start()
-
-            # Attendre que tous les threads se terminent
-            for thread in threads:
-                thread.join()
-
-
-            for campagne_file in campagne_files:
-                nom_fichier = f"./uploads/{campagne_file['saving_name']}"
-                scores[nom_fichier] = calculating_score_for_a_andidate(
-                    results_one[nom_fichier], campagne,  result_poste, texts[nom_fichier], request, nom_fichier)
-                print(f"done for {nom_fichier}")
-
-            # rs = calculating_score_for_a_andidate(
-            #     chain, campagne,  result_poste, request, "./uploads/cv23.pdf")
             
             
-
-            return Response({ "response" : scores}, status=status.HTTP_200_OK)
+        
+            return Response({ "response" : scores_keys}, status=status.HTTP_200_OK)
             # return JsonResponse({"response": CampagneSerializer(campagne).data})
         except Exception as e:
             print(e)

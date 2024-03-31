@@ -11,3 +11,8 @@ class CandidatFilter(django_filters.FilterSet):
     class Meta:
         model = Candidat
         fields = '__all__'
+        filter_overrides = {
+            models.JSONField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
