@@ -39,10 +39,19 @@ class CreateUserView(mixins.CreateModelMixin, generics.GenericAPIView):
         is_admin = serializer.validated_data.get('is_admin')
         
         
+        nom_complet = ''
+        
+        if(nom is not None and prenom is not None):
+            nom_complet = f"{prenom} {nom}"
+
+        
+        
+        
+        
         if is_admin is not None:
-            user = User.objects.create_superuser(email=email, password=password, nom=nom, prenom=prenom, is_admin=is_admin)
+            user = User.objects.create_superuser(email=email, password=password, nom=nom, prenom=prenom, is_admin=is_admin, nom_complet=nom_complet)
         else:
-            user = User.objects.create_user(email=email, password=password, nom=nom, prenom=prenom,)
+            user = User.objects.create_user(email=email, password=password, nom=nom, prenom=prenom, nom_complet=nom_complet)
   
         return Response(self.get_serializer(user).data, status=status.HTTP_201_CREATED)
    
@@ -132,38 +141,31 @@ class ManageView(mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.Gen
         is_admin = serializer.validated_data.get('is_admin')
 
         # user.set_password(user.password)
-        update_fields = []
         
         if email is not None and (request.user.is_admin or request.user == user):
             
             user.email = email
-            # user.save()
-            update_fields.append("email")
             
         if password is not None and (request.user.is_admin or request.user == user):
             
             user.set_password(password)
-            # user.save()
             
         if nom is not None and (request.user.is_admin or request.user == user):
-            update_fields.append("nom")
             
             user.nom = nom
-            # user.save()
+            user.nom_complet = f"{user.prenom} {nom}"
             
         if prenom is not None and (request.user.is_admin or request.user == user):
             
             user.prenom = prenom
-            update_fields.append("prenom")
-            # user.save()
+            user.nom_complet = f"{prenom} {user.nom}"
+
             
         if is_staff is not None and request.user.is_admin:
-            update_fields.append("is_staff")
             user.is_staff = is_staff
             # user.save()
                 
         if is_admin is not None and request.user.is_admin:
-            update_fields.append("is_admin")
             user.is_admin = is_admin
         user.save()
        
