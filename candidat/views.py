@@ -42,7 +42,7 @@ class CandidatDetail(generics.RetrieveUpdateDestroyAPIView):
             user_id = request.GET.get('user')
 
             if user_id is None:
-                return Response({"error": "Paramètre 'user' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "Paramètre 'user' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
             paginator = PageNumberPagination()
             resultats_page = paginator.paginate_queryset(self.queryset, request)
             

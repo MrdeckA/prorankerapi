@@ -326,7 +326,7 @@ class CampagneRankingView(generics.ListCreateAPIView):
             campagne_id = request.GET.get('campagne')
 
             if campagne_id is None:
-                return Response({"error": "Paramètre 'campagne' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "Paramètre 'campagne' manquant dans la requête."}, status=status.HTTP_400_BAD_REQUEST)
 
         
             chain = CampagneConfig.chain

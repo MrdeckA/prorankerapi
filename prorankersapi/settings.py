@@ -196,3 +196,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATICFILES_DIRS = [
     BASE_DIR / "uploads",
 ]
+
+
+
+# Configuration de l'envoi d'e-mails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Serveur SMTP de Gmail
+EMAIL_PORT = 587  # Port SMTP de Gmail (TLS)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mrdeck30@gmail.com'  # Votre adresse e-mail Gmail
+EMAIL_HOST_PASSWORD = 'sytu ssdq hbim islx'  # Mot de passe de votre compte Gmail
+
+# Configuration de l'expéditeur par défaut
+DEFAULT_FROM_EMAIL = '<mrdeck30@gmail.com>'
