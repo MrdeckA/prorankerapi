@@ -238,7 +238,7 @@ def calculating_score_for_a_andidate(result, campagne: Campagne, result_poste, t
         "email": email,
         "nom_complet": nom,
         "telephone": telephone,
-        # "texte_pdf": text,
+        "texte_pdf": text,
         "fichier": fname.lstrip("./uploads/"),
         "matches": matches,
         "poste" : result_poste[0],
@@ -373,6 +373,8 @@ class CampagneRankingView(generics.ListCreateAPIView):
                 candidat.campagne = campagne
                 candidat.nom_complet = scores[score_key]["nom_complet"]
                 candidat.email = scores[score_key]["email"]
+                candidat.score = scores[score_key]["score"]
+                candidat.texte_pdf = scores[score_key]["texte_pdf"]
                 candidat.telephone = scores[score_key]["telephone"]
                 candidat.fichier = scores[score_key]["fichier"]
                 candidat.fichier_sauvegarde = score_key

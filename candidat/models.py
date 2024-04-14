@@ -7,6 +7,8 @@ class Candidat(models.Model):
         Campagne, on_delete=models.CASCADE, related_name='candidats')
     nom_complet = models.CharField(max_length=255, blank=True)
     email = models.EmailField(max_length=255, blank=True)
+    texte_pdf = models.TextField(default='')
+    score = models.IntegerField(default=0)
     fichier = models.CharField(blank=True)
     fichier_sauvegarde = models.CharField(blank=True)
     telephone = models.CharField(max_length=255, blank=True)
