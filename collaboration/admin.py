@@ -4,7 +4,7 @@ from .models import Collaboration
 
 from .models import Collaboration
 class CollaborationAdmin(admin.ModelAdmin):
-    list_display = ('inviteur', 'invite', 'role')
+    list_display = ('inviteur', 'invite', 'role', 'statut_invitation')
 
 
 

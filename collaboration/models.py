@@ -12,7 +12,7 @@ class Collaboration(models.Model):
         User, on_delete=models.CASCADE, related_name='collaborations_recues')
     # Vous pouvez ajuster la longueur en fonction de vos besoins
     role = models.CharField(max_length=255, choices=[(role.value, role.name) for role in Role], default=Role.LECTURE.value)
-    statut_invitation = models.CharField(max_length=255, choices=[(status.value, status.name) for status in StatutInvitation], default=StatutInvitation.EN_ATTENTE.value)
+    statut_invitation = models.CharField(max_length=255, choices=[(status.value, status.name) for status in StatutInvitation], default=StatutInvitation.ENVOYE.value)
 
 
     def __str__(self):

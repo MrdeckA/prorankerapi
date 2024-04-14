@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class StatutInvitation(Enum):
-    EN_ATTENTE = "En attente"
+    ENVOYE = "Envoyée"
     ACCEPTEE = "Acceptée"
     EXPIREE = "Expirée"
     
