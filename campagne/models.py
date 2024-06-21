@@ -7,6 +7,7 @@ import uuid
 class Campagne(models.Model):
     nom = models.CharField(max_length=255, blank=False, default="")
     description_poste = models.TextField(default="", blank=False)
+    is_active = models.BooleanField(default=True, blank=False)
     intitule_poste = models.CharField(max_length=255, blank=False, default="")
     minimum_number_of_languages = models.IntegerField(default=0)
     minimum_number_of_experiences = models.IntegerField(default=0)
@@ -16,7 +17,7 @@ class Campagne(models.Model):
     skills = models.TextField(blank=True, null=True)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='campagnes', default=None, blank=False)
-    files = models.JSONField(blank=False, default=None)
+    files = models.JSONField(blank=True, default=None)
 
     def __str__(self):
         return self.nom
