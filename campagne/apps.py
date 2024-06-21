@@ -7,7 +7,7 @@ class CampagneConfig(AppConfig):
     name = "campagne"
     
     
-    api_key = "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"
+    api_key = "sk-KSMyfdfb1h0RFGCS9SU25SpaTbfbser3BflbfbbrkbFfbJfb8HWfzbfVbmWZwgfbfbbfuX2fbrsfU9dffdfsfbbfbvfNbMbvsfbsCO"
     # api_key=""
 
     llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",
